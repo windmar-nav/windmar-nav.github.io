@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="12" fill="#003d82"/>
+  <g transform="translate(50,50)" fill="white">
+    <!-- Hull -->
+    <path d="M-30,10 Q-28,22 0,22 Q28,22 30,10 L26,10 Q24,18 0,18 Q-24,18 -26,10 Z"/>
+    <!-- Deck -->
+    <rect x="-22" y="4" width="44" height="6" rx="2"/>
+    <!-- Mast -->
+    <rect x="-1.5" y="-30" width="3" height="34" rx="1"/>
+    <!-- Sail -->
+    <path d="M3,-26 Q20,-14 3,2 Z" opacity="0.9"/>
+    <!-- Flag -->
+    <path d="M1.5,-30 L14,-34 L14,-26 L1.5,-30 Z" opacity="0.85"/>
+  </g>
+</svg>
