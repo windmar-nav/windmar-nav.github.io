@@ -68,7 +68,7 @@
         </div>
 
         <div class="sidebar-section">
-            <div class="sidebar-title">VISIR Engine</div>
+            <div class="sidebar-title">Dijkstra Engine</div>
             <ul class="sidebar-menu">
                 <li><a href="#visir-graph"><i class="fas fa-cubes"></i> Time-Expanded Graph</a></li>
                 <li><a href="#visir-dijkstra"><i class="fas fa-project-diagram"></i> Dijkstra Search</a></li>
@@ -127,7 +127,7 @@
                     <strong><i class="fas fa-info-circle"></i> Technical Article</strong><br>
                     This article describes the two route optimization engines implemented in WindMar:
                     a fine-grained <strong>A* search</strong> on a spatial grid and a coarser
-                    <strong>VISIR-style Dijkstra</strong> on a time-expanded graph. Both are custom
+                    <strong>graph-based Dijkstra</strong> on a time-expanded graph. Both are custom
                     implementations that share the same vessel model, weather data pipeline, and
                     seakeeping safety assessment. The article covers graph construction, cost functions,
                     the safety weight mechanism for controlling the fuel&ndash;safety trade-off, and the
@@ -141,12 +141,12 @@
                     operates on a 0.5&deg; spatial grid with eight-connected adjacency and uses the
                     classical A* algorithm with an admissible fuel-based heuristic to find the
                     minimum-cost path. It excels at short-to-medium routes where fine-grained
-                    coastal navigation and high spatial resolution matter. The <strong>VISIR-style
-                    engine</strong>, inspired by the VISIR model (Mannarini et al., 2016), builds a
+                    coastal navigation and high spatial resolution matter. The <strong>graph-based Dijkstra
+                    engine</strong> builds a
                     time-expanded graph on a coarser 1&deg; grid with 3-hour discrete time steps.
                     This allows it to account for weather evolution over the voyage duration &mdash;
                     a vessel that departs during a storm may find calmer conditions 12 hours later.
-                    The VISIR engine also implements voluntary speed reduction (VSR), automatically
+                    The Dijkstra engine also implements voluntary speed reduction (VSR), automatically
                     evaluating multiple candidate speeds per edge and selecting the cheapest safe
                     option. Both engines share a configurable <em>safety weight</em> parameter
                     that continuously interpolates between pure fuel minimization and full weather
@@ -185,7 +185,7 @@
                         weather does not change drastically during transit.
                     </li>
                     <li>
-                        <strong>VISIR-style Dijkstra</strong> &mdash; a time-expanded graph search
+                        <strong>graph-based Dijkstra</strong> &mdash; a time-expanded graph search
                         where each node carries a time coordinate. Weather is sampled at the node&rsquo;s
                         actual time, capturing the evolution of conditions across the voyage.
                     </li>
@@ -250,7 +250,7 @@
                     adjacent ocean cells is additionally checked for land crossings via ray&ndash;casting,
                     ensuring that routes do not cut across peninsulas or narrow isthmuses. The fine 0.5&deg;
                     resolution allows the A* engine to navigate through straits and along coastlines
-                    where the coarser VISIR grid cannot.
+                    where the coarser Dijkstra grid cannot.
                 </p>
             </section>
 
@@ -372,10 +372,10 @@
             <!-- VISIR TIME-EXPANDED GRAPH -->
             <!-- ============================================================ -->
             <section id="visir-graph">
-                <h2>6. VISIR Engine &mdash; Time-Expanded Graph</h2>
+                <h2>6. Dijkstra Engine &mdash; Time-Expanded Graph</h2>
 
                 <p>
-                    The VISIR-style engine extends the spatial grid with a <em>time dimension</em>,
+                    The Dijkstra engine extends the spatial grid with a <em>time dimension</em>,
                     creating a 3-D graph where each node is identified by the tuple
                     \((\text{row},\, \text{col},\, \text{time\_step})\). This allows the algorithm
                     to query weather conditions at the actual time the vessel would arrive at each
@@ -423,7 +423,7 @@
                     The time-expanded structure means that two nodes at the same spatial location
                     but different time steps are distinct. A vessel arriving at cell (5, 10) at
                     hour 6 encounters different weather than one arriving at hour 12. This is the
-                    key advantage of the VISIR approach for long ocean crossings where weather
+                    key advantage of the Dijkstra approach for long ocean crossings where weather
                     systems move and evolve during transit.
                 </p>
             </section>
@@ -432,10 +432,10 @@
             <!-- VISIR DIJKSTRA -->
             <!-- ============================================================ -->
             <section id="visir-dijkstra">
-                <h2>7. VISIR Engine &mdash; Dijkstra Search</h2>
+                <h2>7. Dijkstra Engine &mdash; Dijkstra Search</h2>
 
                 <p>
-                    Despite using Dijkstra&rsquo;s algorithm as its foundation, the VISIR engine
+                    Despite using Dijkstra&rsquo;s algorithm as its foundation, the Dijkstra engine
                     incorporates an <strong>admissible heuristic</strong> (A*-guided Dijkstra) to
                     focus exploration toward the destination. The heuristic is the same
                     great-circle-based minimum cost-per-mile estimate used by the A* engine:
@@ -488,7 +488,7 @@
                 <h2>7.3 Voluntary Speed Reduction</h2>
 
                 <p>
-                    A distinguishing feature of the VISIR engine is <strong>voluntary speed
+                    A distinguishing feature of the Dijkstra engine is <strong>voluntary speed
                     reduction (VSR)</strong>. At each edge, the algorithm evaluates 3 candidate
                     speeds linearly spaced between 10 kts and the vessel&rsquo;s service speed
                     (+2 kts margin). For each candidate speed, the safety constraints are checked:
@@ -513,7 +513,7 @@
                 <p>
                     VSR faithfully models real-world slow-steaming in bad weather. A ship master
                     facing heavy head seas will reduce speed to limit slamming and parametric roll.
-                    The VISIR engine captures this decision automatically during the graph search.
+                    The Dijkstra engine captures this decision automatically during the graph search.
                 </p>
             </section>
 
@@ -761,7 +761,7 @@
                             <td>Fuel \(\uparrow\!\uparrow\), Safety \(\uparrow\!\uparrow\)</td>
                         </tr>
                         <tr>
-                            <td>VISIR</td>
+                            <td>Dijkstra</td>
                             <td>Fuel \(\downarrow\), Safety \(\downarrow\)</td>
                             <td>Fuel &uarr;, Safety &uarr;</td>
                             <td>Fuel \(\uparrow\!\uparrow\), Safety \(\uparrow\!\uparrow\)</td>
@@ -795,7 +795,7 @@
                         <tr>
                             <th>Aspect</th>
                             <th>A* Engine</th>
-                            <th>VISIR Engine</th>
+                            <th>Dijkstra Engine</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -864,7 +864,7 @@
                 <ul>
                     <li>
                         <strong>Coastal and confined waters</strong> &mdash; The fine 0.5&deg; grid
-                        resolves narrow straits, island passages, and coastal features that the VISIR
+                        resolves narrow straits, island passages, and coastal features that the Dijkstra
                         engine&rsquo;s 1&deg; grid cannot navigate.
                     </li>
                     <li>
@@ -877,7 +877,7 @@
                     </li>
                 </ul>
 
-                <h3>14.2 VISIR Engine Strengths</h3>
+                <h3>14.2 Dijkstra Engine Strengths</h3>
                 <ul>
                     <li>
                         <strong>Long ocean crossings</strong> &mdash; On multi-day voyages, weather
@@ -888,7 +888,7 @@
                     <li>
                         <strong>Rapidly changing weather</strong> &mdash; When forecast fields show
                         significant weather evolution (e.g., a developing low-pressure system), the
-                        VISIR engine can exploit temporal windows that the A* engine misses.
+                        Dijkstra engine can exploit temporal windows that the A* engine misses.
                     </li>
                     <li>
                         <strong>Speed adaptation</strong> &mdash; VSR is integrated into the search,

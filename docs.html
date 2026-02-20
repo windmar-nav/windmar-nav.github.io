@@ -187,7 +187,7 @@
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
                             <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af; width: 5rem;"><strong>v0.0.8</strong></td>
                             <td style="padding: 0.35rem 0.5rem; color: #6b7280; width: 6rem;">2026-02-18</td>
-                            <td style="padding: 0.35rem 0;">Vessel model upgrade (SFOC calibration fix, Kwon + STAWAVE-1 dual wave methods, bisection performance predictor), engine log analytics (CSV/Excel upload, 5 KPIs, 6 charts, calibration bridge), weather pipeline refactoring (user-triggered overlays, viewport-aware resync, deferred supersede), VISIR cost formula fix (safety on fuel only), hard avoidance limits (Hs &ge; 6&thinsp;m, wind &ge; 70&thinsp;kts), dashboard layout harmonization, 79 API endpoints</td>
+                            <td style="padding: 0.35rem 0;">Vessel model upgrade (SFOC calibration fix, Kwon + STAWAVE-1 dual wave methods, bisection performance predictor), engine log analytics (CSV/Excel upload, 5 KPIs, 6 charts, calibration bridge), weather pipeline refactoring (user-triggered overlays, viewport-aware resync, deferred supersede), Dijkstra cost formula fix (safety on fuel only), hard avoidance limits (Hs &ge; 6&thinsp;m, wind &ge; 70&thinsp;kts), dashboard layout harmonization, 79 API endpoints</td>
                         </tr>
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
                             <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af; width: 5rem;"><strong>v0.0.7</strong></td>
@@ -254,7 +254,7 @@
                     A forecast timeline (f000&ndash;f120, 3-hourly steps) supports all 7 weather layers with play/pause and scrubbing.
                     The interface uses a <strong>two-mode architecture</strong>: <em>Weather mode</em> presents a full-screen ECDIS-style
                     chart with 7 weather overlays and WMO-standard color ramps; <em>Analysis mode</em> displays a left panel (320px) for
-                    route import, voyage calculation, optimization comparison (6 route variants from dual A*/VISIR engines), and
+                    route import, voyage calculation, optimization comparison (6 route variants from dual A*/Dijkstra engines), and
                     Monte Carlo simulation (P10/P50/P90). A dedicated analysis page shows a per-waypoint passage plan with
                     ETA, SOG, wind, waves, current speed/direction, fuel, and data source badges.
                     The system evaluates vessel motions (roll, pitch, vertical acceleration)
@@ -295,7 +295,7 @@
                     <div class="feature-card">
                         <h4><i class="fas fa-route"></i> Route Optimization</h4>
                         <ul>
-                            <li>Dual-engine: A* grid search + VISIR Dijkstra</li>
+                            <li>Dual-engine: A* grid search + Dijkstra (graph-based)</li>
                             <li>6 route variants (2 engines &times; 3 safety weights)</li>
                             <li>Per-waypoint passage plan with weather data</li>
                             <li>Turn-angle path smoothing with land-crossing check</li>
@@ -1179,7 +1179,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                     WindMar enforces safety at two levels: <strong>hard avoidance limits</strong> that instantly
                     reject extreme conditions, and a <strong>three-tier motion-based classification</strong>
                     (Safe, Marginal, Dangerous) computed from the seakeeping model. Both are applied during
-                    route optimization by both the A* and VISIR engines.
+                    route optimization by both the A* and Dijkstra engines.
                 </p>
 
                 <h3>Hard Avoidance Limits (v0.0.8)</h3>
@@ -1253,7 +1253,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
 
                 <div class="alert warning">
                     <strong><i class="fas fa-exclamation-triangle"></i> Route Optimization Enforcement</strong><br>
-                    Safety criteria are enforced by both A* and VISIR engines. Grid cells classified as
+                    Safety criteria are enforced by both A* and Dijkstra engines. Grid cells classified as
                     <strong>Dangerous</strong> receive a graduated penalty (2&times; to 5&times; cost, or infinite
                     above 1.5&times; the dangerous threshold). <strong>Marginal</strong> cells receive a penalty
                     proportional to the exceedance above safe limits. <strong>Safe</strong> cells use
@@ -1568,7 +1568,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                 <h2>Safety Constraints</h2>
 
                 <p>
-                    Safety constraints are integrated directly into both the A* and VISIR search engines, ensuring
+                    Safety constraints are integrated directly into both the A* and Dijkstra search engines, ensuring
                     that neither optimizer produces a route that violates safety criteria or regulatory requirements.
                     Constraints are applied at three levels: hard avoidance, seakeeping safety, and regulatory zone enforcement.
                 </p>
