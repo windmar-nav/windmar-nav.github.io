@@ -164,52 +164,52 @@
             <!-- ============================================================ -->
             <section id="overview">
                 <h1>WindMar Technical Documentation</h1>
-                <p class="docs-subtitle">Weather-aware maritime route optimization for MR product tankers</p>
+                <p class="docs-subtitle">Weather routing &amp; performance analytics for merchant ships</p>
 
-                <div class="alert" style="background: #f0f7f0; border-left: 4px solid #34a853; padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+                <div class="alert" style="background: rgba(76, 175, 80, 0.08); border-left: 4px solid #4caf50; padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
                     <strong><i class="fas fa-code-branch"></i> Development Log</strong>
-                    <span style="display: inline-flex; align-items: center; gap: 0.4rem; background: #e6f4ea; border: 1px solid #34a853; color: #1e7e34; padding: 0.15rem 0.65rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 600; margin-left: 0.5rem; vertical-align: middle;">
+                    <span style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(76, 175, 80, 0.12); border: 1px solid rgba(76, 175, 80, 0.3); color: #66bb6a; padding: 0.15rem 0.65rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 600; margin-left: 0.5rem; vertical-align: middle;">
                         <i class="fas fa-tag"></i> v0.0.8 &mdash; Last Stable
                     </span>
                     <table style="width: 100%; margin-top: 0.75rem; font-size: 0.9rem; border-collapse: collapse;">
-                        <tr style="border-bottom: 1px solid #d4e6d4;">
-                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #555; width: 5rem;"><strong>v0.0.8</strong></td>
-                            <td style="padding: 0.35rem 0.5rem; color: #666; width: 6rem;">2026-02-18</td>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af; width: 5rem;"><strong>v0.0.8</strong></td>
+                            <td style="padding: 0.35rem 0.5rem; color: #6b7280; width: 6rem;">2026-02-18</td>
                             <td style="padding: 0.35rem 0;">Vessel model upgrade (SFOC calibration fix, Kwon + STAWAVE-1 dual wave methods, bisection performance predictor), engine log analytics (CSV/Excel upload, 5 KPIs, 6 charts, calibration bridge), weather pipeline refactoring (user-triggered overlays, viewport-aware resync, deferred supersede), VISIR cost formula fix (safety on fuel only), hard avoidance limits (Hs &ge; 6&thinsp;m, wind &ge; 70&thinsp;kts), dashboard layout harmonization, 79 API endpoints</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #d4e6d4;">
-                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #555; width: 5rem;"><strong>v0.0.7</strong></td>
-                            <td style="padding: 0.35rem 0.5rem; color: #666; width: 6rem;">2026-02-13</td>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af; width: 5rem;"><strong>v0.0.7</strong></td>
+                            <td style="padding: 0.35rem 0.5rem; color: #6b7280; width: 6rem;">2026-02-13</td>
                             <td style="padding: 0.35rem 0;">Two-mode architecture (Weather/Analysis), 7 weather layers with WMO color ramps, forecast timeline for all layers, analysis panel + detail page with per-waypoint passage plan, route save/load, current &amp; wave direction in results, Monte Carlo P10/P50/P90, vessel speed sync</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #d4e6d4;">
-                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #555; width: 5rem;"><strong>v0.0.6</strong></td>
-                            <td style="padding: 0.35rem 0.5rem; color: #666; width: 6rem;">2026-02-10</td>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af; width: 5rem;"><strong>v0.0.6</strong></td>
+                            <td style="padding: 0.35rem 0.5rem; color: #6b7280; width: 6rem;">2026-02-10</td>
                             <td style="padding: 0.35rem 0;">ECDIS-style UI redesign, dual speed-strategy optimization (Same Speed / Match ETA), voyage baseline gating, wave crest rendering with polar diagram, GFS wind DB ingestion, turn-angle path smoothing</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #d4e6d4;">
-                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #555; width: 5rem;"><strong>v0.0.5</strong></td>
-                            <td style="padding: 0.35rem 0.5rem; color: #666; width: 6rem;">2026-02-09</td>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af; width: 5rem;"><strong>v0.0.5</strong></td>
+                            <td style="padding: 0.35rem 0.5rem; color: #6b7280; width: 6rem;">2026-02-09</td>
                             <td style="padding: 0.35rem 0;">Weather DB architecture, temporal weather provisioning, Monte Carlo with correlated perturbations, CII compliance, PostgreSQL persistence</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #d4e6d4;">
-                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #555;"><strong>v0.0.4</strong></td>
-                            <td style="padding: 0.35rem 0.5rem; color: #666;">2026-02-09</td>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af;"><strong>v0.0.4</strong></td>
+                            <td style="padding: 0.35rem 0.5rem; color: #6b7280;">2026-02-09</td>
                             <td style="padding: 0.35rem 0;">Frontend refactor, Monte Carlo simulation, grid weather provider</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #d4e6d4;">
-                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #555;"><strong>v0.0.3</strong></td>
-                            <td style="padding: 0.35rem 0.5rem; color: #666;">2026-02-09</td>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af;"><strong>v0.0.3</strong></td>
+                            <td style="padding: 0.35rem 0.5rem; color: #6b7280;">2026-02-09</td>
                             <td style="padding: 0.35rem 0;">Data sources docs, credential setup, modernize pyproject.toml</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #d4e6d4;">
-                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #555;"><strong>v0.0.2</strong></td>
-                            <td style="padding: 0.35rem 0.5rem; color: #666;">2026-02-08</td>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af;"><strong>v0.0.2</strong></td>
+                            <td style="padding: 0.35rem 0.5rem; color: #6b7280;">2026-02-08</td>
                             <td style="padding: 0.35rem 0;">GFS near-real-time wind data + 5-day forecast timeline</td>
                         </tr>
                         <tr>
-                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #555;"><strong>v0.0.1</strong></td>
-                            <td style="padding: 0.35rem 0.5rem; color: #666;">2026-02-08</td>
+                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af;"><strong>v0.0.1</strong></td>
+                            <td style="padding: 0.35rem 0.5rem; color: #6b7280;">2026-02-08</td>
                             <td style="padding: 0.35rem 0;">Initial public release</td>
                         </tr>
                     </table>
@@ -220,7 +220,7 @@
                     WindMar is a physics-based vessel performance modeling system with weather-aware A* route optimization,
                     fuel consumption minimization, and IMO CII compliance tracking. It combines hydrodynamic resistance
                     calculations, seakeeping analysis, and real-time weather data to find the safest and most fuel-efficient
-                    routes for MR product tankers.
+                    routes for merchant ships.
                 </div>
 
                 <h3>What is WindMar?</h3>
@@ -256,7 +256,7 @@
                         <a href="assets/img/windmar-route-analysis.png" target="_blank">
                             <img src="assets/img/windmar-route-analysis.png" alt="Route Analysis — weather overlays with voyage calculation and Monte Carlo simulation" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                         </a>
-                        <figcaption style="text-align: center; font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
                             <strong>Route Analysis</strong> — Wind overlay with voyage calculation panel, waypoint routing, and Monte Carlo simulation (P10/P50/P90)
                         </figcaption>
                     </figure>
@@ -264,7 +264,7 @@
                         <a href="assets/img/windmar-passage-plan.png" target="_blank">
                             <img src="assets/img/windmar-passage-plan.png" alt="Passage Plan — per-waypoint analysis with ETA, weather conditions, and fuel consumption" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                         </a>
-                        <figcaption style="text-align: center; font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
                             <strong>Analysis Detail</strong> — Per-waypoint passage plan with ETA, SOG, wind, waves, currents, fuel, and weather insights
                         </figcaption>
                     </figure>
