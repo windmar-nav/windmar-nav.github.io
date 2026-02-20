@@ -133,6 +133,13 @@
         </div>
 
         <div class="sidebar-section">
+            <div class="sidebar-title">Gallery</div>
+            <ul class="sidebar-menu">
+                <li><a href="#gallery"><i class="fas fa-images"></i> Screenshots</a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
             <div class="sidebar-title">Technical Articles</div>
             <ul class="sidebar-menu">
                 <li><a href="#technical-articles"><i class="fas fa-newspaper"></i> Article Index</a></li>
@@ -169,9 +176,14 @@
                 <div class="alert" style="background: rgba(76, 175, 80, 0.08); border-left: 4px solid #4caf50; padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
                     <strong><i class="fas fa-code-branch"></i> Development Log</strong>
                     <span style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(76, 175, 80, 0.12); border: 1px solid rgba(76, 175, 80, 0.3); color: #66bb6a; padding: 0.15rem 0.65rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 600; margin-left: 0.5rem; vertical-align: middle;">
-                        <i class="fas fa-tag"></i> v0.0.8 &mdash; Last Stable
+                        <i class="fas fa-tag"></i> v0.0.9 &mdash; Last Stable
                     </span>
                     <table style="width: 100%; margin-top: 0.75rem; font-size: 0.9rem; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af; width: 5rem;"><strong>v0.0.9</strong></td>
+                            <td style="padding: 0.35rem 0.5rem; color: #6b7280; width: 6rem;">2026-02-20</td>
+                            <td style="padding: 0.35rem 0;">Modular architecture refactoring (6,922&rarr;281 LOC main.py, 9 domain routers, 37 Pydantic schemas), calibration improvements (ME-specific fuel, laden/ballast detection from ME load %, widened bounds), engine log deduplication, 426 tests passing</td>
+                        </tr>
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
                             <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af; width: 5rem;"><strong>v0.0.8</strong></td>
                             <td style="padding: 0.35rem 0.5rem; color: #6b7280; width: 6rem;">2026-02-18</td>
@@ -253,19 +265,19 @@
 
                 <div class="screenshot-gallery" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2rem 0;">
                     <figure style="margin: 0;">
-                        <a href="assets/img/windmar-route-analysis.png" target="_blank">
-                            <img src="assets/img/windmar-route-analysis.png" alt="Route Analysis — weather overlays with voyage calculation and Monte Carlo simulation" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                        <a href="assets/img/screenshots/weather-wind.png" target="_blank">
+                            <img src="assets/img/screenshots/weather-wind.png" alt="Wind forecast with particle animation and 5-day timeline" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
                         </a>
                         <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
-                            <strong>Route Analysis</strong> — Wind overlay with voyage calculation panel, waypoint routing, and Monte Carlo simulation (P10/P50/P90)
+                            <strong>Weather Mode</strong> — GFS wind particle animation with 5-day forecast timeline and WMO color ramp
                         </figcaption>
                     </figure>
                     <figure style="margin: 0;">
-                        <a href="assets/img/windmar-passage-plan.png" target="_blank">
-                            <img src="assets/img/windmar-passage-plan.png" alt="Passage Plan — per-waypoint analysis with ETA, weather conditions, and fuel consumption" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                        <a href="assets/img/screenshots/route-portugal-casquets.png" target="_blank">
+                            <img src="assets/img/screenshots/route-portugal-casquets.png" alt="Route optimization — 6 variants from dual A*/Dijkstra engines" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
                         </a>
                         <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
-                            <strong>Analysis Detail</strong> — Per-waypoint passage plan with ETA, SOG, wind, waves, currents, fuel, and weather insights
+                            <strong>Route Optimization</strong> — Portugal to Casquets, 6 route variants (2 engines &times; 3 safety weights)
                         </figcaption>
                     </figure>
                 </div>
@@ -630,9 +642,9 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                 </div>
 
                 <p>
-                    At service speed of 14.5 knots (7.46 m/s) with L_pp = 176 m, the Reynolds number is approximately
-                    1.1 &times; 10<sup>9</sup>, placing the flow firmly in the turbulent regime. The friction coefficient
-                    C_f is then approximately 0.00145.
+                    At service speed of 13 knots (6.69 m/s) with L_pp = 176 m, the Reynolds number is approximately
+                    9.9 &times; 10<sup>8</sup>, placing the flow firmly in the turbulent regime. The friction coefficient
+                    C_f is then approximately 0.00148.
                 </p>
 
                 <h3>Form Factor (1 + k_1)</h3>
@@ -687,8 +699,8 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                 </div>
 
                 <p>
-                    At the design speed of 14.5 knots, the Froude number for an MR tanker is approximately
-                    Fr = 7.46 / sqrt(9.81 &times; 176) &asymp; 0.179. The exponential term exp(-0.4 &times; 0.179<sup>-2</sup>)
+                    At the design speed of 13 knots, the Froude number for an MR tanker is approximately
+                    Fr = 6.69 / sqrt(9.81 &times; 176) &asymp; 0.161. The exponential term exp(-0.4 &times; 0.161<sup>-2</sup>)
                     is very small, confirming that wave-making resistance contributes less than 5% of total resistance
                     at service speed.
                 </p>
@@ -723,9 +735,9 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                         <tr><td>Displacement</td><td>65,000 MT</td><td>20,000 MT</td></tr>
                         <tr><td>Block Coefficient (C_b)</td><td>0.82</td><td>0.75</td></tr>
                         <tr><td>Wetted Surface</td><td>7,500 m&sup2;</td><td>5,200 m&sup2;</td></tr>
-                        <tr><td>Service Speed</td><td>14.5 kts</td><td>15.0 kts</td></tr>
+                        <tr><td>Service Speed</td><td>13.0 kts</td><td>13.0 kts</td></tr>
                         <tr><td>DWT</td><td>49,000 MT</td><td>&mdash;</td></tr>
-                        <tr><td>MCR</td><td>8,840 kW</td><td>8,840 kW</td></tr>
+                        <tr><td>MCR</td><td>6,600 kW</td><td>6,600 kW</td></tr>
                         <tr><td>SFOC at MCR</td><td>171 g/kWh</td><td>171 g/kWh</td></tr>
                     </tbody>
                 </table>
@@ -881,14 +893,14 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                 </p>
 
                 <p>
-                    For a laden MR tanker in head seas with H_s = 3 m at service speed (Fr &asymp; 0.179), the wave
+                    For a laden MR tanker in head seas with H_s = 3 m at service speed (Fr &asymp; 0.161), the wave
                     added resistance is approximately:
                 </p>
 
                 <div class="formula-block">
                     <div class="formula-title">Example Calculation</div>
-                    \[R_{\text{wave}} = 1.0 \times 4.5 \times 1025 \times 9.81 \times 32 \times 3^2 \times (1 + 0.179)\]
-                    \[= 1.0 \times 4.5 \times 1025 \times 9.81 \times 32 \times 9 \times 1.179 \approx 15{,}400 \; \text{N} \approx 15.4 \; \text{kN}\]
+                    \[R_{\text{wave}} = 1.0 \times 4.5 \times 1025 \times 9.81 \times 32 \times 3^2 \times (1 + 0.161)\]
+                    \[= 1.0 \times 4.5 \times 1025 \times 9.81 \times 32 \times 9 \times 1.161 \approx 15{,}200 \; \text{N} \approx 15.2 \; \text{kN}\]
                 </div>
             </section>
 
@@ -2790,6 +2802,191 @@ Response:
 
             <!-- ============================================================ -->
             <!-- TECHNICAL ARTICLES INDEX -->
+            <!-- ============================================================ -->
+            <!-- ============================================================ -->
+            <!-- GALLERY -->
+            <!-- ============================================================ -->
+            <section id="gallery">
+                <h2>Screenshots</h2>
+                <p>
+                    Screenshots from the WindMar application showing the main features and capabilities.
+                    Click any image to view full size.
+                </p>
+
+                <h3>Weather Overlays</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0;">
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/weather-wind.png" target="_blank">
+                            <img src="assets/img/screenshots/weather-wind.png" alt="Wind forecast" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Wind</strong> &mdash; GFS particle animation with 5-day forecast timeline
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/weather-waves.png" target="_blank">
+                            <img src="assets/img/screenshots/weather-waves.png" alt="Wave height overlay" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Waves</strong> &mdash; Significant wave height from CMEMS with WMO color ramp
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/weather-swell.png" target="_blank">
+                            <img src="assets/img/screenshots/weather-swell.png" alt="Swell overlay" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Swell</strong> &mdash; Swell height and direction with crest rendering
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/weather-currents.png" target="_blank">
+                            <img src="assets/img/screenshots/weather-currents.png" alt="Ocean currents" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Currents</strong> &mdash; Ocean current velocity from CMEMS global physics model
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/weather-visibility.png" target="_blank">
+                            <img src="assets/img/screenshots/weather-visibility.png" alt="Visibility overlay" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Visibility</strong> &mdash; Atmospheric visibility field
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/weather-ice.png" target="_blank">
+                            <img src="assets/img/screenshots/weather-ice.png" alt="Sea ice concentration" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Sea Ice</strong> &mdash; Arctic ice concentration from CMEMS
+                        </figcaption>
+                    </figure>
+                </div>
+
+                <h3>Baltic Ice Animation</h3>
+                <div style="margin: 1.5rem 0;">
+                    <video controls autoplay muted loop style="width: 100%; max-width: 800px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        <source src="assets/img/screenshots/baltic-ice-animation.webm" type="video/webm">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p style="font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                        <strong>Baltic Sea Ice Forecast</strong> &mdash; 5-day ice concentration animation showing ice coverage evolution across forecast timesteps
+                    </p>
+                </div>
+
+                <h3>Route Optimization</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0;">
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/route-portugal-casquets.png" target="_blank">
+                            <img src="assets/img/screenshots/route-portugal-casquets.png" alt="Route optimization" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Optimized Routes</strong> &mdash; Portugal to Casquets, 6 route variants from dual A*/Dijkstra engines
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/voyage-window.png" target="_blank">
+                            <img src="assets/img/screenshots/voyage-window.png" alt="Voyage calculation" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Voyage Calculation</strong> &mdash; Per-leg fuel, speed, ETA breakdown with weather conditions
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/analysis-console.png" target="_blank">
+                            <img src="assets/img/screenshots/analysis-console.png" alt="Analysis console" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Analysis Console</strong> &mdash; Route comparison table with fuel, distance, time, and waypoint counts
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/sog-profile.png" target="_blank">
+                            <img src="assets/img/screenshots/sog-profile.png" alt="Speed over ground profile" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>SOG Profile</strong> &mdash; Speed over ground and cumulative fuel along the optimized route
+                        </figcaption>
+                    </figure>
+                </div>
+
+                <h3>Vessel Performance</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0;">
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/vessel-model.png" target="_blank">
+                            <img src="assets/img/screenshots/vessel-model.png" alt="Vessel model curves" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Vessel Model</strong> &mdash; Resistance, brake power, SFOC, and fuel curves with calibration factors
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/vessel-specs.png" target="_blank">
+                            <img src="assets/img/screenshots/vessel-specs.png" alt="Vessel specifications" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Specifications</strong> &mdash; Configurable vessel parameters persisted in PostgreSQL
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/fuel-analysis.png" target="_blank">
+                            <img src="assets/img/screenshots/fuel-analysis.png" alt="Fuel analysis" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Fuel Analysis</strong> &mdash; Physics-based fuel scenarios across loading conditions and weather
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/engine-log-performance.png" target="_blank">
+                            <img src="assets/img/screenshots/engine-log-performance.png" alt="Engine log performance" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Performance Predictor</strong> &mdash; Bisection solver for speed at given engine load in weather
+                        </figcaption>
+                    </figure>
+                </div>
+
+                <h3>Engine Log &amp; Compliance</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0;">
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/engine-log-entries.png" target="_blank">
+                            <img src="assets/img/screenshots/engine-log-entries.png" alt="Engine log entries" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Engine Log Entries</strong> &mdash; Paginated entries browser with event and date filters
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/engine-log-analytics.png" target="_blank">
+                            <img src="assets/img/screenshots/engine-log-analytics.png" alt="Engine log analytics" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Analytics Dashboard</strong> &mdash; Speed-power scatter, fuel distributions, SFOC profile, voyage timeline
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/cii-compliance.png" target="_blank">
+                            <img src="assets/img/screenshots/cii-compliance.png" alt="CII compliance" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>CII Compliance</strong> &mdash; IMO Carbon Intensity rating with multi-year projection
+                        </figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <a href="assets/img/screenshots/regulations.png" target="_blank">
+                            <img src="assets/img/screenshots/regulations.png" alt="Regulatory zones" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        </a>
+                        <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
+                            <strong>Regulatory Zones</strong> &mdash; ECA/SECA, TSS, HRA zones with GeoJSON visualization
+                        </figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- TECHNICAL ARTICLES -->
             <!-- ============================================================ -->
             <section id="technical-articles">
                 <h2>Technical Articles</h2>
