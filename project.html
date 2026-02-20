@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WindMar - Weather Routing & Performance Analytics</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #060c19;
+            --bg-raised: #0a1020;
+            --bg-surface: #0d1828;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #d1d5db;
+            --text-light: #9ca3af;
+            --text-dim: #6b7280;
+            --blue: #3b82f6;
+            --blue-light: #60a5fa;
+            --blue-glow: rgba(59, 130, 246, 0.15);
+            --amber: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { color: var(--blue-light); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* ---- Top nav ---- */
+        .topnav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: 56px;
+            background: rgba(6, 12, 25, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2rem;
+        }
+        .topnav-logo {
+            display: flex; align-items: center; gap: 0.5rem;
+            color: #fff; font-weight: 700; font-size: 1rem; text-decoration: none;
+        }
+        .topnav-logo:hover { text-decoration: none; }
+        .topnav-logo i { color: var(--blue-light); }
+        .topnav-links { display: flex; align-items: center; gap: 1.5rem; font-size: 0.85rem; }
+        .topnav-links a { color: rgba(255,255,255,0.65); text-decoration: none; transition: color 0.2s; }
+        .topnav-links a:hover { color: #fff; text-decoration: none; }
+        .topnav-demo {
+            background: var(--blue-glow); border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 6px; padding: 0.3rem 0.85rem;
+            color: var(--blue-light) !important; font-weight: 600;
+        }
+        .topnav-demo:hover { background: rgba(37, 99, 235, 0.25); }
+
+        /* ---- Hero ---- */
+        .hero {
+            position: relative;
+            min-height: 92vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 8rem 2rem 4rem;
+            overflow: hidden;
+        }
+        .hero-bg {
+            position: absolute; inset: 0;
+            background: url('assets/img/screenshots/weather-wind.png') center/cover no-repeat;
+            opacity: 0.18;
+            filter: blur(2px);
+        }
+        .hero-gradient {
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, var(--bg) 0%, transparent 30%, transparent 60%, var(--bg) 100%);
+        }
+        .hero-content {
+            position: relative; z-index: 1;
+            max-width: 720px; text-align: center;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: var(--blue-glow); border: 1px solid rgba(96, 165, 250, 0.2);
+            color: var(--blue-light); padding: 0.3rem 0.9rem;
+            border-radius: 2rem; font-size: 0.78rem; font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 {
+            font-size: 3.2rem; font-weight: 800; color: #fff;
+            line-height: 1.15; margin-bottom: 1.25rem;
+            letter-spacing: -0.02em;
+        }
+        .hero h1 span { color: var(--blue-light); }
+        .hero p {
+            font-size: 1.15rem; color: var(--text-light);
+            max-width: 560px; margin: 0 auto 2rem;
+            line-height: 1.7;
+        }
+        .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.7rem 1.6rem; border-radius: 8px;
+            font-size: 0.9rem; font-weight: 600; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn:hover { text-decoration: none; }
+        .btn-primary { background: var(--blue); color: #fff; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-ghost { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid var(--border); }
+        .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+
+        /* ---- Section ---- */
+        .section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+        .section-label {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--blue-light); margin-bottom: 0.75rem;
+        }
+        .section h2 {
+            font-size: 2rem; font-weight: 700; color: #fff;
+            margin-bottom: 1rem; letter-spacing: -0.01em;
+        }
+        .section-desc {
+            font-size: 1rem; color: var(--text-light);
+            max-width: 640px; line-height: 1.7; margin-bottom: 3rem;
+        }
+
+        /* ---- Philosophy ---- */
+        .philosophy {
+            background: var(--bg-raised);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .philosophy-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;
+        }
+        .philosophy-card {
+            padding: 1.75rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+        .philosophy-card h3 {
+            font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: 0.75rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .philosophy-card h3 i { color: var(--blue-light); font-size: 0.9rem; }
+        .philosophy-card p { font-size: 0.88rem; color: var(--text-light); line-height: 1.65; }
+
+        /* ---- Features ---- */
+        .feature-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;
+            align-items: center; margin-bottom: 5rem;
+        }
+        .feature-row.reverse { direction: rtl; }
+        .feature-row.reverse > * { direction: ltr; }
+        .feature-text h3 {
+            font-size: 1.35rem; font-weight: 700; color: #fff;
+            margin-bottom: 0.75rem;
+        }
+        .feature-text p {
+            font-size: 0.92rem; color: var(--text-light); line-height: 1.7;
+        }
+        .feature-img img {
+            width: 100%; border-radius: 10px;
+            border: 1px solid var(--border);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+        }
+
+        /* ---- Capabilities grid ---- */
+        .cap-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .cap-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 10px; padding: 1.5rem;
+        }
+        .cap-card i {
+            font-size: 1.25rem; color: var(--blue-light);
+            margin-bottom: 0.75rem; display: block;
+        }
+        .cap-card h4 { font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 0.4rem; }
+        .cap-card p { font-size: 0.82rem; color: var(--text-dim); line-height: 1.6; }
+
+        /* ---- Screenshot gallery ---- */
+        .gallery-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+        }
+        .gallery-grid a { display: block; }
+        .gallery-grid img {
+            width: 100%; border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .gallery-grid img:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        /* ---- Demo CTA ---- */
+        .demo-section {
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg) 0%, var(--bg-raised) 100%);
+            border-top: 1px solid var(--border);
+            padding: 5rem 2rem;
+        }
+        .demo-section h2 { font-size: 2rem; color: #fff; margin-bottom: 0.75rem; }
+        .demo-section p { color: var(--text-light); margin-bottom: 2rem; font-size: 1rem; }
+
+        /* ---- Footer ---- */
+        .footer {
+            padding: 2.5rem 2rem;
+            text-align: center;
+            font-size: 0.8rem; color: var(--text-dim);
+            border-top: 1px solid var(--border);
+        }
+        .footer a { color: var(--text-light); }
+        .footer-links { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 0.75rem; }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
+            .philosophy-grid { grid-template-columns: 1fr; }
+            .feature-row { grid-template-columns: 1fr; }
+            .feature-row.reverse { direction: ltr; }
+            .cap-grid { grid-template-columns: 1fr; }
+            .gallery-grid { grid-template-columns: 1fr 1fr; }
+            .topnav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top navigation -->
+<nav class="topnav">
+    <a href="project.html" class="topnav-logo">
+        <i class="fas fa-ship"></i>
+        WindMar
+    </a>
+    <div class="topnav-links">
+        <a href="index.html">Documentation</a>
+        <a href="https://github.com/windmar-nav/windmar" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+        <a href="https://demo-windmar.slmar.co" target="_blank" class="topnav-demo"><i class="fas fa-play-circle"></i> Live Demo</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-gradient"></div>
+    <div class="hero-content">
+        <div class="hero-badge"><i class="fas fa-tag"></i> v0.0.9 &mdash; Open Source</div>
+        <h1>Weather Routing &amp; <span>Performance Analytics</span></h1>
+        <p>
+            Physics-based fuel consumption modelling, multi-source weather data,
+            and route optimization algorithms for merchant ships.
+        </p>
+        <div class="hero-actions">
+            <a href="https://demo-windmar.slmar.co" target="_blank" class="btn btn-primary">
+                <i class="fas fa-play"></i> Try the Demo
+            </a>
+            <a href="index.html" class="btn btn-ghost">
+                <i class="fas fa-book"></i> Documentation
+            </a>
+            <a href="https://github.com/windmar-nav/windmar" target="_blank" class="btn btn-ghost">
+                <i class="fab fa-github"></i> Source Code
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Philosophy -->
+<section class="philosophy">
+    <div class="section" style="padding-top: 4rem; padding-bottom: 4rem;">
+        <div class="section-label"><i class="fas fa-compass"></i> Philosophy</div>
+        <h2>Tools belong on board</h2>
+        <p class="section-desc">
+            Route analysis and performance monitoring belong where decisions are made.
+            The Master and bridge team should have direct access to the models, the data,
+            and the reasoning behind every recommendation.
+        </p>
+        <div class="philosophy-grid">
+            <div class="philosophy-card">
+                <h3><i class="fas fa-eye"></i> Transparent Models</h3>
+                <p>
+                    Every calculation can be inspected, every assumption challenged, and every
+                    parameter calibrated against real operational data. No black boxes.
+                </p>
+            </div>
+            <div class="philosophy-card">
+                <h3><i class="fas fa-lock-open"></i> Open Source</h3>
+                <p>
+                    Commercial secrecy around algorithms that influence safety-critical decisions
+                    is not a healthy position for the industry. WindMar is licensed under Apache 2.0.
+                </p>
+            </div>
+            <div class="philosophy-card">
+                <h3><i class="fas fa-anchor"></i> Operator Sovereignty</h3>
+                <p>
+                    The people who navigate the vessel should own and understand the tools they
+                    rely on. Shore-side black boxes undermine professional judgement.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<div class="section">
+    <div class="section-label"><i class="fas fa-layer-group"></i> Features</div>
+    <h2>End-to-end voyage intelligence</h2>
+    <p class="section-desc">
+        From hydrodynamic resistance calculations and engine SFOC curves
+        to real-time weather overlays and IMO CII compliance &mdash; all in one platform.
+    </p>
+
+    <!-- Feature 1: Route Optimization -->
+    <div class="feature-row">
+        <div class="feature-text">
+            <h3>Route Optimization</h3>
+            <p>
+                Dual-engine optimization with A* and Dijkstra algorithms. Six route variants &mdash;
+                fuel, balanced, and safety profiles &mdash; compared side by side with fuel savings,
+                ETA, and per-waypoint passage plan. Monte Carlo P10/P50/P90 envelopes quantify uncertainty.
+            </p>
+        </div>
+        <div class="feature-img">
+            <a href="assets/img/screenshots/route-portugal-casquets.png" target="_blank">
+                <img src="assets/img/screenshots/route-portugal-casquets.png" alt="Route optimization: Portugal to Casquets with six route variants">
+            </a>
+        </div>
+    </div>
+
+    <!-- Feature 2: Weather Overlays -->
+    <div class="feature-row reverse">
+        <div class="feature-text">
+            <h3>7-Layer Weather Overlays</h3>
+            <p>
+                Wind (GFS 0.25&deg;), waves, currents, SST, swell, visibility, and ice from
+                Copernicus Marine and NOAA. WMO-standard color ramps, forecast timeline (f000&ndash;f120),
+                and animated particle flow. Pre-ingested into PostgreSQL for sub-second queries.
+            </p>
+        </div>
+        <div class="feature-img">
+            <a href="assets/img/screenshots/weather-wind.png" target="_blank">
+                <img src="assets/img/screenshots/weather-wind.png" alt="Weather overlay: wind speed with animated particle flow">
+            </a>
+        </div>
+    </div>
+
+    <!-- Feature 3: Vessel Performance -->
+    <div class="feature-row">
+        <div class="feature-text">
+            <h3>Vessel Performance Model</h3>
+            <p>
+                Holtrop-Mennen hull resistance, Blendermann wind loads, Kwon/STAWAVE-1 wave resistance,
+                and quadratic SFOC curves. Calibrate against engine log data to match real-world
+                performance. Four model curves &mdash; resistance, power, SFOC, daily fuel &mdash;
+                with theoretical vs. calibrated comparison.
+            </p>
+        </div>
+        <div class="feature-img">
+            <a href="assets/img/screenshots/vessel-model.png" target="_blank">
+                <img src="assets/img/screenshots/vessel-model.png" alt="Vessel model: resistance, power, SFOC, and fuel curves">
+            </a>
+        </div>
+    </div>
+
+    <!-- Feature 4: Engine Log Analytics -->
+    <div class="feature-row reverse">
+        <div class="feature-text">
+            <h3>Engine Log Analytics</h3>
+            <p>
+                Upload CSV or Excel noon reports. Five KPIs, six interactive charts &mdash; fuel
+                consumption timeline, RPM distribution, speed through water, event breakdown.
+                One-click calibration bridge connects log data to the physics model.
+            </p>
+        </div>
+        <div class="feature-img">
+            <a href="assets/img/screenshots/engine-log-analytics.png" target="_blank">
+                <img src="assets/img/screenshots/engine-log-analytics.png" alt="Engine log analytics: KPIs and charts">
+            </a>
+        </div>
+    </div>
+
+    <!-- Feature 5: CII Compliance -->
+    <div class="feature-row">
+        <div class="feature-text">
+            <h3>IMO CII Compliance</h3>
+            <p>
+                Calculate Carbon Intensity Indicator ratings for any voyage. Future projections,
+                reduction planner, and rating boundaries (A&ndash;E) per IMO MEPC guidelines.
+                Assess regulatory compliance before departure.
+            </p>
+        </div>
+        <div class="feature-img">
+            <a href="assets/img/screenshots/cii-compliance.png" target="_blank">
+                <img src="assets/img/screenshots/cii-compliance.png" alt="CII compliance calculator with rating boundaries">
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Capabilities grid -->
+<section class="philosophy">
+    <div class="section" style="padding-top: 4rem; padding-bottom: 4rem;">
+        <div class="section-label"><i class="fas fa-cubes"></i> Capabilities</div>
+        <h2>Built for real operations</h2>
+        <div class="cap-grid">
+            <div class="cap-card">
+                <i class="fas fa-wind"></i>
+                <h4>Multi-Source Weather</h4>
+                <p>NOAA GFS + Copernicus CMEMS + ERA5 reanalysis. 7 layers, 6h ingestion cycle, viewport-aware resync.</p>
+            </div>
+            <div class="cap-card">
+                <i class="fas fa-route"></i>
+                <h4>Dual Optimizers</h4>
+                <p>A* graph search and Dijkstra shortest-path. Fuel, balanced, and safety profiles with variable speed strategy.</p>
+            </div>
+            <div class="cap-card">
+                <i class="fas fa-ship"></i>
+                <h4>Physics Engine</h4>
+                <p>Holtrop-Mennen, Blendermann, Kwon, STAWAVE-1. Seakeeping motions, slamming, parametric roll criteria.</p>
+            </div>
+            <div class="cap-card">
+                <i class="fas fa-chart-line"></i>
+                <h4>Engine Log Calibration</h4>
+                <p>Upload noon reports, calibrate hull/wind/wave/SFOC factors. Match model to real-world performance data.</p>
+            </div>
+            <div class="cap-card">
+                <i class="fas fa-dice"></i>
+                <h4>Monte Carlo Simulation</h4>
+                <p>Correlated weather perturbations. P10/P50/P90 fuel and ETA envelopes for risk-aware voyage planning.</p>
+            </div>
+            <div class="cap-card">
+                <i class="fas fa-map-marked-alt"></i>
+                <h4>Regulatory Zones</h4>
+                <p>20 TSS polygons, 6 ECA boundaries, High Risk Area, Suez/Panama canal zones. Cost penalties in optimizer.</p>
+            </div>
+            <div class="cap-card">
+                <i class="fas fa-certificate"></i>
+                <h4>CII Rating</h4>
+                <p>IMO Carbon Intensity Indicator calculator, future projections, reduction planner. A&ndash;E rating boundaries.</p>
+            </div>
+            <div class="cap-card">
+                <i class="fas fa-tachometer-alt"></i>
+                <h4>SOG Profile &amp; ETA</h4>
+                <p>Time-based speed over ground charts, cumulative fuel curves, ETA comparison bars for all route variants.</p>
+            </div>
+            <div class="cap-card">
+                <i class="fas fa-database"></i>
+                <h4>Self-Hosted</h4>
+                <p>Docker Compose deployment. PostgreSQL + Redis + FastAPI + Next.js. No cloud dependency. Runs on a laptop.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Screenshot gallery -->
+<div class="section">
+    <div class="section-label"><i class="fas fa-images"></i> Gallery</div>
+    <h2>See it in action</h2>
+    <p class="section-desc" style="margin-bottom: 2rem;">Click any screenshot to view full resolution.</p>
+    <div class="gallery-grid">
+        <a href="assets/img/screenshots/weather-wind.png" target="_blank">
+            <img src="assets/img/screenshots/weather-wind.png" alt="Wind overlay">
+        </a>
+        <a href="assets/img/screenshots/weather-waves.png" target="_blank">
+            <img src="assets/img/screenshots/weather-waves.png" alt="Wave overlay">
+        </a>
+        <a href="assets/img/screenshots/weather-currents.png" target="_blank">
+            <img src="assets/img/screenshots/weather-currents.png" alt="Current overlay">
+        </a>
+        <a href="assets/img/screenshots/route-portugal-casquets.png" target="_blank">
+            <img src="assets/img/screenshots/route-portugal-casquets.png" alt="Route optimization">
+        </a>
+        <a href="assets/img/screenshots/analysis-console.png" target="_blank">
+            <img src="assets/img/screenshots/analysis-console.png" alt="Analysis console">
+        </a>
+        <a href="assets/img/screenshots/sog-profile.png" target="_blank">
+            <img src="assets/img/screenshots/sog-profile.png" alt="SOG profile">
+        </a>
+        <a href="assets/img/screenshots/vessel-model.png" target="_blank">
+            <img src="assets/img/screenshots/vessel-model.png" alt="Vessel model">
+        </a>
+        <a href="assets/img/screenshots/engine-log-analytics.png" target="_blank">
+            <img src="assets/img/screenshots/engine-log-analytics.png" alt="Engine log analytics">
+        </a>
+        <a href="assets/img/screenshots/cii-compliance.png" target="_blank">
+            <img src="assets/img/screenshots/cii-compliance.png" alt="CII compliance">
+        </a>
+        <a href="assets/img/screenshots/weather-ice.png" target="_blank">
+            <img src="assets/img/screenshots/weather-ice.png" alt="Ice overlay">
+        </a>
+        <a href="assets/img/screenshots/fuel-analysis.png" target="_blank">
+            <img src="assets/img/screenshots/fuel-analysis.png" alt="Fuel analysis">
+        </a>
+        <a href="assets/img/screenshots/voyage-window.png" target="_blank">
+            <img src="assets/img/screenshots/voyage-window.png" alt="Voyage window">
+        </a>
+    </div>
+</div>
+
+<!-- Demo CTA -->
+<section class="demo-section">
+    <div class="hero-badge" style="margin-bottom: 1.5rem;"><i class="fas fa-play-circle"></i> Live Demo</div>
+    <h2>Try it without installing</h2>
+    <p>Pre-loaded weather data and engine logs. No API keys required.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="https://demo-windmar.slmar.co" target="_blank" class="btn btn-primary">
+            <i class="fas fa-external-link-alt"></i> Access Demo
+        </a>
+        <a href="mailto:windmar@slmar.co" class="btn btn-ghost">
+            <i class="fas fa-envelope"></i> Request a Key
+        </a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-links">
+        <a href="index.html">Documentation</a>
+        <a href="https://github.com/windmar-nav/windmar" target="_blank">GitHub</a>
+        <a href="https://demo-windmar.slmar.co" target="_blank">Demo</a>
+        <a href="mailto:windmar@slmar.co">Contact</a>
+        <a href="https://slmar.co">SL Mar</a>
+    </div>
+    <p>Copyright 2024&ndash;2026 <a href="https://slmar.co">SL Mar</a>. Licensed under Apache 2.0.</p>
+</footer>
+
+</body>
+</html>
