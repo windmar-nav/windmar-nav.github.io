@@ -88,6 +88,25 @@ body {
     color: white;
 }
 
+/* Demo Nav Link */
+.demo-nav-link {
+    background: rgba(37, 99, 235, 0.15) !important;
+    border: 1px solid rgba(96, 165, 250, 0.3) !important;
+    border-radius: 6px !important;
+    padding: 0.3rem 0.75rem !important;
+    color: #60a5fa !important;
+    font-weight: 600 !important;
+}
+.demo-nav-link:hover {
+    background: rgba(37, 99, 235, 0.25) !important;
+    color: #93bbfc !important;
+}
+
+/* Demo CTA responsive */
+@media (max-width: 768px) {
+    .demo-cta { grid-template-columns: 1fr !important; }
+}
+
 /* Dropdown Navigation */
 .docs-nav-dropdown {
     position: relative;
