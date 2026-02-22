@@ -262,7 +262,7 @@
                     A forecast timeline (f000&ndash;f120, 3-hourly steps) supports all 7 weather layers with play/pause and scrubbing.
                     The interface uses a <strong>two-mode architecture</strong>: <em>Weather mode</em> presents a full-screen ECDIS-style
                     chart with 7 weather overlays and WMO-standard color ramps; <em>Analysis mode</em> displays a left panel (320px) for
-                    route import, voyage calculation, optimization comparison (6 route variants from dual A*/Dijkstra engines), and
+                    route import, voyage calculation, optimization comparison (A* engine with optional VISIR Dijkstra), and
                     Monte Carlo simulation (P10/P50/P90). A dedicated analysis page shows a per-waypoint passage plan with
                     ETA, SOG, wind, waves, current speed/direction, fuel, and data source badges.
                     The system evaluates vessel motions (roll, pitch, vertical acceleration)
@@ -282,10 +282,10 @@
                     </figure>
                     <figure style="margin: 0;">
                         <a href="assets/img/screenshots/route-portugal-casquets.png" target="_blank">
-                            <img src="assets/img/screenshots/route-portugal-casquets.png" alt="Route optimization — 6 variants from dual A*/Dijkstra engines" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                            <img src="assets/img/screenshots/route-portugal-casquets.png" alt="Route optimization with Pareto front and strait shortcuts" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
                         </a>
                         <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
-                            <strong>Route Optimization</strong> — Portugal to Casquets, 6 route variants (2 engines &times; 3 safety weights)
+                            <strong>Route Optimization</strong> — Weather-optimal routing with Pareto front and strait shortcuts
                         </figcaption>
                     </figure>
                 </div>
@@ -303,10 +303,10 @@
                     <div class="feature-card">
                         <h4><i class="fas fa-route"></i> Route Optimization</h4>
                         <ul>
-                            <li>Dual-engine: A* grid search + Dijkstra (graph-based)</li>
-                            <li>6 route variants (2 engines &times; 3 safety weights)</li>
-                            <li>Per-waypoint passage plan with weather data</li>
-                            <li>Turn-angle path smoothing with land-crossing check</li>
+                            <li>A* grid search with 9 strait shortcuts (primary engine)</li>
+                            <li>3 safety-weight variants + Pareto front (fuel vs. time)</li>
+                            <li>Course-change penalty, safety fallback routing</li>
+                            <li>Per-waypoint passage plan with SOG profile</li>
                         </ul>
                     </div>
                     <div class="feature-card">
@@ -1187,7 +1187,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                     WindMar enforces safety at two levels: <strong>hard avoidance limits</strong> that instantly
                     reject extreme conditions, and a <strong>three-tier motion-based classification</strong>
                     (Safe, Marginal, Dangerous) computed from the seakeeping model. Both are applied during
-                    route optimization by both the A* and Dijkstra engines.
+                    route optimization by the A* engine (and VISIR Dijkstra when enabled).
                 </p>
 
                 <h3>Hard Avoidance Limits (v0.0.8)</h3>
@@ -1261,7 +1261,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
 
                 <div class="alert warning">
                     <strong><i class="fas fa-exclamation-triangle"></i> Route Optimization Enforcement</strong><br>
-                    Safety criteria are enforced by both A* and Dijkstra engines. Grid cells classified as
+                    Safety criteria are enforced by the routing engines. Grid cells classified as
                     <strong>Dangerous</strong> receive a graduated penalty (2&times; to 5&times; cost, or infinite
                     above 1.5&times; the dangerous threshold). <strong>Marginal</strong> cells receive a penalty
                     proportional to the exceedance above safe limits. <strong>Safe</strong> cells use
@@ -1576,7 +1576,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                 <h2>Safety Constraints</h2>
 
                 <p>
-                    Safety constraints are integrated directly into both the A* and Dijkstra search engines, ensuring
+                    Safety constraints are integrated directly into the routing engines, ensuring
                     that neither optimizer produces a route that violates safety criteria or regulatory requirements.
                     Constraints are applied at three levels: hard avoidance, seakeeping safety, and regulatory zone enforcement.
                 </p>
@@ -3118,7 +3118,7 @@ Response:
                             <img src="assets/img/screenshots/route-portugal-casquets.png" alt="Route optimization" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
                         </a>
                         <figcaption style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 0.5rem;">
-                            <strong>Optimized Routes</strong> &mdash; Portugal to Casquets, 6 route variants from dual A*/Dijkstra engines
+                            <strong>Optimized Routes</strong> &mdash; Weather-optimal routing with A* engine, strait shortcuts, and Pareto front
                         </figcaption>
                     </figure>
                     <figure style="margin: 0;">

@@ -128,11 +128,20 @@
                     <strong><i class="fas fa-info-circle"></i> Technical Article</strong><br>
                     This article describes the two route optimization engines implemented in WindMar:
                     a fine-grained <strong>A* search</strong> on a spatial grid and a coarser
-                    <strong>graph-based Dijkstra</strong> on a time-expanded graph. Both are custom
+                    <strong>VISIR Dijkstra</strong> on a time-expanded graph. Both are custom
                     implementations that share the same vessel model, weather data pipeline, and
                     seakeeping safety assessment. The article covers graph construction, cost functions,
                     the safety weight mechanism for controlling the fuel&ndash;safety trade-off, and the
-                    three user-selectable optimization strategies.
+                    Pareto analysis mode for fuel&ndash;time trade-offs.
+                </div>
+
+                <div class="alert warning">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Architecture Note (v0.1.0)</strong><br>
+                    The <strong>A* engine</strong> is the primary production engine. It includes 9 pre-validated
+                    strait shortcuts (visibility graph edges), course-change penalty, safety fallback routing,
+                    and Pareto front analysis. The <strong>VISIR Dijkstra engine</strong> is available as an
+                    optional secondary engine (off by default, enabled via UI toggle). VISIR lacks strait edge
+                    injection and may timeout on routes requiring narrow passage navigation (e.g. Dover Strait).
                 </div>
 
                 <h3>Abstract</h3>
