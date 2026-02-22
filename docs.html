@@ -86,6 +86,10 @@
                 <li><a href="#astar-algorithm"><i class="fas fa-route"></i> A* Algorithm</a></li>
                 <li><a href="#variable-speed"><i class="fas fa-tachometer-alt"></i> Variable Speed</a></li>
                 <li><a href="#safety-constraints"><i class="fas fa-ban"></i> Safety Constraints</a></li>
+                <li><a href="#gshhs-coastline"><i class="fas fa-globe-americas"></i> GSHHS Coastline</a></li>
+                <li><a href="#variable-resolution"><i class="fas fa-th"></i> Variable Resolution</a></li>
+                <li><a href="#strait-shortcuts"><i class="fas fa-draw-polygon"></i> Strait Shortcuts</a></li>
+                <li><a href="#pareto-front"><i class="fas fa-chart-area"></i> Pareto Front</a></li>
             </ul>
         </div>
 
@@ -93,6 +97,9 @@
             <div class="sidebar-title">Compliance</div>
             <ul class="sidebar-menu">
                 <li><a href="#cii-rating"><i class="fas fa-certificate"></i> IMO CII Rating</a></li>
+                <li><a href="#fueleu-maritime"><i class="fas fa-leaf"></i> FuelEU Maritime</a></li>
+                <li><a href="#voyage-reporting"><i class="fas fa-file-alt"></i> Voyage Reporting</a></li>
+                <li><a href="#charter-party"><i class="fas fa-handshake"></i> Charter Party Clauses</a></li>
                 <li><a href="#regulatory-zones"><i class="fas fa-map-marked-alt"></i> Regulatory Zones</a></li>
             </ul>
         </div>
@@ -1646,6 +1653,135 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
             </section>
 
             <!-- ============================================================ -->
+            <!-- GSHHS COASTLINE (v0.1.0) -->
+            <!-- ============================================================ -->
+            <section id="gshhs-coastline">
+                <h2>GSHHS Coastline Integration</h2>
+
+                <p>
+                    WindMar v0.1.0 replaces the <code>global-land-mask</code> package (1&thinsp;km raster grid) with
+                    GSHHS (Global Self-consistent, Hierarchical, High-resolution Shoreline) vector polygons. This
+                    provides sub-km accuracy for land detection, critical for nearshore routing and strait navigation.
+                </p>
+
+                <h3>Implementation</h3>
+                <ul>
+                    <li><strong>Shapefile loading</strong> &mdash; GSHHS shapefiles are loaded once at startup and cached for the session lifetime</li>
+                    <li><strong>Point-in-polygon</strong> &mdash; land/ocean queries use <code>shapely</code> prepared geometries for O(log n) performance</li>
+                    <li><strong>Fallback</strong> &mdash; if GSHHS shapefiles are not installed, the system falls back to <code>global-land-mask</code> with a startup warning</li>
+                    <li><strong>Resolution</strong> &mdash; uses GSHHS &ldquo;intermediate&rdquo; resolution (i) by default, balancing accuracy against memory</li>
+                </ul>
+
+                <div class="alert info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Why vector polygons?</strong> &mdash; Raster land masks discretize the coastline onto a fixed grid. At narrow
+                    straits (e.g., Gibraltar, 14&thinsp;km), a 1&thinsp;km grid can falsely block valid shipping channels. Vector polygons
+                    test the exact coastline geometry.
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- VARIABLE RESOLUTION GRID (v0.1.0) -->
+            <!-- ============================================================ -->
+            <section id="variable-resolution">
+                <h2>Variable Resolution Grid</h2>
+
+                <p>
+                    The routing graph uses an adaptive resolution corridor around the great-circle path between
+                    origin and destination. This concentrates computational effort where it matters most &mdash;
+                    near coastlines and obstacles &mdash; while keeping the open-ocean grid coarse for efficiency.
+                </p>
+
+                <h3>Resolution Tiers</h3>
+                <table>
+                    <thead>
+                        <tr><th>Zone</th><th>Resolution</th><th>Trigger</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Nearshore</td><td>0.1&deg; (~11&thinsp;km)</td><td>Within 50&thinsp;km of coastline</td></tr>
+                        <tr><td>Transition</td><td>0.25&deg; (~28&thinsp;km)</td><td>50&ndash;200&thinsp;km from coast</td></tr>
+                        <tr><td>Open ocean</td><td>0.5&deg; (~56&thinsp;km)</td><td>More than 200&thinsp;km from coast</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Cross-Tier Connectivity</h3>
+                <p>
+                    Nodes at resolution boundaries are connected with 16-neighbor connectivity, ensuring smooth
+                    transitions between tiers. The optimizer can route freely across resolution boundaries without
+                    artificial cost penalties or path discontinuities.
+                </p>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- STRAIT SHORTCUTS (v0.1.0) -->
+            <!-- ============================================================ -->
+            <section id="strait-shortcuts">
+                <h2>Strait Visibility Graph</h2>
+
+                <p>
+                    Eight pre-validated shipping straits are modelled as visibility graph edges, allowing the optimizer
+                    to transit narrow passages that would be blocked or poorly represented by the regular grid.
+                </p>
+
+                <h3>Supported Straits</h3>
+                <table>
+                    <thead>
+                        <tr><th>Strait</th><th>Width</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Gibraltar</td><td>14&thinsp;km</td><td>Atlantic&ndash;Mediterranean gateway</td></tr>
+                        <tr><td>English Channel</td><td>34&thinsp;km</td><td>Dover TSS mandatory</td></tr>
+                        <tr><td>Dover Strait</td><td>34&thinsp;km</td><td>Busiest shipping lane globally</td></tr>
+                        <tr><td>Malacca</td><td>2.8&thinsp;km (min)</td><td>Asia&ndash;Europe critical chokepoint</td></tr>
+                        <tr><td>Singapore</td><td>16&thinsp;km</td><td>Keppel Channel approach</td></tr>
+                        <tr><td>Suez Approach</td><td>&mdash;</td><td>Port Said entry/exit waypoints</td></tr>
+                        <tr><td>Bab el-Mandeb</td><td>26&thinsp;km</td><td>Red Sea&ndash;Gulf of Aden</td></tr>
+                        <tr><td>Hormuz</td><td>39&thinsp;km</td><td>Persian Gulf exit</td></tr>
+                    </tbody>
+                </table>
+
+                <p>
+                    Each strait is defined as a pair of entry/exit waypoints with pre-validated coordinates verified
+                    against navigational charts. The visibility graph merges these edges into the main routing graph
+                    so the optimizer can choose strait transit naturally as part of the shortest-path search.
+                </p>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- PARETO FRONT (v0.1.0) -->
+            <!-- ============================================================ -->
+            <section id="pareto-front">
+                <h2>Multi-Objective Pareto Front</h2>
+
+                <p>
+                    Instead of selecting a single fuel&ndash;time tradeoff parameter (&lambda;), WindMar sweeps a range of
+                    &lambda; values and returns the full Pareto front: the set of routes where no other route is
+                    simultaneously faster <em>and</em> more fuel-efficient.
+                </p>
+
+                <h3>Lambda Sweep</h3>
+                <p>
+                    The optimizer runs multiple Dijkstra passes with &lambda; values spanning from fuel-minimizing
+                    (low &lambda;) to time-minimizing (high &lambda;). Each pass produces a route with a specific
+                    fuel/time pair. Dominated routes are discarded, leaving only the Pareto-optimal set.
+                </p>
+
+                <h3>Smart Default Selection</h3>
+                <p>
+                    The recommended operating point is selected automatically as the &ldquo;knee&rdquo; of the Pareto curve &mdash;
+                    the point of maximum curvature where marginal fuel savings per hour of delay are highest. Users can
+                    override this by clicking any point on the interactive Pareto chart in the analysis panel.
+                </p>
+
+                <h3>Speed Granularity</h3>
+                <p>
+                    The optimizer evaluates speeds in 0.5&thinsp;kt increments (e.g., 10.0, 10.5, 11.0, &hellip; 16.0 kts),
+                    providing fine-grained control over the fuel&ndash;time tradeoff. This replaces the earlier 2&thinsp;kt steps
+                    for more realistic operational speed profiles.
+                </p>
+            </section>
+
+            <!-- ============================================================ -->
             <!-- IMO CII RATING -->
             <!-- ============================================================ -->
             <section id="cii-rating">
@@ -1819,6 +1955,104 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                     the ray casting algorithm. For a point (lat, lon), the algorithm casts a horizontal ray and
                     counts the number of intersections with the polygon boundary. An odd count means the point
                     is inside the polygon; an even count means outside.
+                </p>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- FUELEU MARITIME (v0.1.0) -->
+            <!-- ============================================================ -->
+            <section id="fueleu-maritime">
+                <h2>FuelEU Maritime Compliance</h2>
+
+                <p>
+                    The EU FuelEU Maritime regulation (2025) mandates progressive reduction in the greenhouse gas
+                    intensity of energy used on board ships. WindMar calculates Well-to-Wake GHG intensity per voyage
+                    and tracks compliance against the regulatory trajectory.
+                </p>
+
+                <h3>GHG Intensity Calculation</h3>
+                <p>
+                    GHG intensity is measured as grams of CO<sub>2</sub>-equivalent per megajoule of energy consumed
+                    (gCO<sub>2</sub>eq/MJ), using Well-to-Wake emission factors that include upstream fuel production
+                    emissions. WindMar applies the default factors from Annex II of the regulation.
+                </p>
+
+                <h3>Compliance Balance</h3>
+                <p>
+                    Each voyage generates a compliance surplus (if below the reference intensity) or deficit (if above).
+                    Surpluses and deficits accumulate over the compliance period and can be banked or borrowed across years
+                    within regulatory limits.
+                </p>
+
+                <h3>Pooling &amp; Penalties</h3>
+                <ul>
+                    <li><strong>Pooling scenarios</strong> &mdash; model compliance balance sharing between vessels in a fleet pool</li>
+                    <li><strong>Penalty estimator</strong> &mdash; calculates financial exposure if the compliance deficit exceeds the allowed threshold</li>
+                </ul>
+
+                <h3>4-Tab Interface</h3>
+                <p>
+                    The FuelEU page provides four tabs: <strong>Calculator</strong> (per-voyage GHG intensity),
+                    <strong>Compliance</strong> (balance tracking), <strong>Pooling</strong> (fleet scenarios), and
+                    <strong>Projections</strong> (future year trajectory).
+                </p>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- VOYAGE REPORTING (v0.1.0) -->
+            <!-- ============================================================ -->
+            <section id="voyage-reporting">
+                <h2>Voyage Reporting</h2>
+
+                <p>
+                    WindMar generates structured voyage reports from completed route calculations, following
+                    IMO-standard formats used across the commercial shipping industry.
+                </p>
+
+                <h3>Report Types</h3>
+                <ul>
+                    <li><strong>Noon report</strong> &mdash; daily position, speed, fuel consumption, and weather conditions in IMO format</li>
+                    <li><strong>Departure report</strong> &mdash; vessel condition at sailing: drafts, bunker quantities, cargo, ETA</li>
+                    <li><strong>Arrival report</strong> &mdash; end-of-voyage summary with actual vs. planned comparison</li>
+                </ul>
+
+                <h3>PDF Export</h3>
+                <p>
+                    All report types can be exported to PDF with a company branding placeholder for operator customization.
+                    Voyage history is searchable and filterable by date range, port pair, and vessel.
+                </p>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- CHARTER PARTY WEATHER CLAUSES (v0.1.0) -->
+            <!-- ============================================================ -->
+            <section id="charter-party">
+                <h2>Charter Party Weather Clause Tools</h2>
+
+                <p>
+                    Charter party agreements typically include weather clauses that define &ldquo;good weather&rdquo;
+                    conditions for performance assessment. WindMar provides tools to verify compliance with these
+                    clauses using route weather data and engine log records.
+                </p>
+
+                <h3>Good Weather Day Counter</h3>
+                <p>
+                    Counts the number of days along a route where conditions fall within the agreed Beaufort scale
+                    thresholds (typically BF &le; 4 or BF &le; 5). This is the standard metric for assessing whether
+                    warranted speed/consumption claims are valid.
+                </p>
+
+                <h3>Warranted Performance Verification</h3>
+                <ul>
+                    <li><strong>Speed verification</strong> &mdash; compares actual speed through water against the warranted speed during good weather days</li>
+                    <li><strong>Consumption verification</strong> &mdash; compares actual fuel consumption against warranted consumption during good weather days</li>
+                </ul>
+
+                <h3>Off-Hire Detection</h3>
+                <p>
+                    Identifies periods in engine log data where the vessel was effectively off-hire (speed below a
+                    configurable threshold, extended port stays, or mechanical downtime), which are excluded from
+                    performance assessments.
                 </p>
             </section>
 
