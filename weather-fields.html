@@ -84,6 +84,7 @@
             <div class="sidebar-title">Implementation</div>
             <ul class="sidebar-menu">
                 <li><a href="#ocean-mask"><i class="fas fa-globe"></i> Ocean Mask</a></li>
+                <li><a href="#api-performance"><i class="fas fa-tachometer-alt"></i> API Performance</a></li>
                 <li><a href="#data-quality"><i class="fas fa-check-circle"></i> Data Quality</a></li>
             </ul>
         </div>
@@ -691,10 +692,152 @@ where \( u_o \) is the eastward current velocity (m/s)<br>
             </section>
 
             <!-- ============================================================ -->
+            <!-- API PERFORMANCE -->
+            <!-- ============================================================ -->
+            <section id="api-performance">
+                <h2>6. API Performance Benchmarks</h2>
+
+                <p>
+                    All weather endpoints enforce a maximum bounding box of 30&deg; latitude &times;
+                    70&deg; longitude to prevent excessive memory consumption during CMEMS and GFS
+                    downloads. The default viewport is centred on the NE Atlantic and Mediterranean
+                    (30&deg;N&ndash;60&deg;N, 30&deg;W&ndash;40&deg;E), which fits exactly within
+                    this constraint. The following benchmarks were measured on this default viewport
+                    with a cold cache (no file cache, empty Redis, empty database) on 24 February 2026.
+                </p>
+
+                <h3>6.1 Single-Frame Fetch (Cold Cache)</h3>
+                <p>
+                    Each endpoint was called once with <code>resolution=1</code> on the full
+                    30&deg;&times;70&deg; viewport. Times include the upstream download from
+                    CMEMS or GFS where applicable.
+                </p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>Source</th>
+                            <th>Response Size</th>
+                            <th>Time (cold)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>/api/weather/wind</code></td>
+                            <td>GFS (NOAA)</td>
+                            <td>967 KB</td>
+                            <td>0.15 s</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/weather/wind/velocity</code></td>
+                            <td>GFS (NOAA)</td>
+                            <td>781 KB</td>
+                            <td>0.14 s</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/weather/waves</code></td>
+                            <td>CMEMS</td>
+                            <td>2.5 MB</td>
+                            <td>106 s</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/weather/swell</code></td>
+                            <td>CMEMS (shared)</td>
+                            <td>5.8 MB</td>
+                            <td>1.6 s</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/weather/currents</code></td>
+                            <td>CMEMS</td>
+                            <td>3.4 MB</td>
+                            <td>79 s</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/weather/currents/velocity</code></td>
+                            <td>CMEMS (cached)</td>
+                            <td>1.9 MB</td>
+                            <td>35 s</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/weather/sst</code></td>
+                            <td>CMEMS</td>
+                            <td>1.0 MB</td>
+                            <td>35 s</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/weather/ice</code></td>
+                            <td>CMEMS</td>
+                            <td>926 KB</td>
+                            <td>7 s</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/weather/visibility</code></td>
+                            <td>GFS (NOAA)</td>
+                            <td>771 KB</td>
+                            <td>1.6 s</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="alert info">
+                    <strong><i class="fas fa-info-circle"></i> Cold vs Warm Cache</strong><br>
+                    The long fetch times for waves (106 s) and currents (79 s) reflect the initial
+                    CMEMS download over the Copernicus Marine API. Once cached, subsequent requests
+                    for the same viewport and forecast hour return in under 2 seconds. Swell shares
+                    the wave download and returns instantly after the wave layer has been fetched.
+                    GFS wind data is served from GRIB2 files cached on disk and is sub-second even
+                    on the first request of a new model run.
+                </div>
+
+                <h3>6.2 Viewport Constraints</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Value</th>
+                            <th>Enforced At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Maximum latitude span</td>
+                            <td>30&deg;</td>
+                            <td>Backend (<code>_clamp_bbox</code>) + Frontend (<code>MapViewportProvider</code>)</td>
+                        </tr>
+                        <tr>
+                            <td>Maximum longitude span</td>
+                            <td>70&deg;</td>
+                            <td>Backend (<code>_clamp_bbox</code>) + Frontend (<code>MapViewportProvider</code>)</td>
+                        </tr>
+                        <tr>
+                            <td>Default viewport</td>
+                            <td>30&deg;N&ndash;60&deg;N, 30&deg;W&ndash;40&deg;E</td>
+                            <td>Backend Query defaults + Frontend <code>InitialFitBounds</code></td>
+                        </tr>
+                        <tr>
+                            <td>Max overlay grid dimension</td>
+                            <td>500 px</td>
+                            <td>Backend (<code>_overlay_step</code> subsampling)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>
+                    Requests exceeding the maximum span are silently clamped to the limit, centred
+                    on the requested midpoint. This protects the backend from out-of-memory conditions
+                    when users zoom out to global scale: at 30&deg;&times;70&deg;, the CMEMS wave
+                    download is approximately 400 MB on disk (8 parameters &times; 41 forecast steps
+                    &times; ~304K native grid points at 0.083&deg;), which is within the memory budget
+                    of a 4-worker Gunicorn deployment.
+                </p>
+            </section>
+
+            <!-- ============================================================ -->
             <!-- DATA QUALITY -->
             <!-- ============================================================ -->
             <section id="data-quality">
-                <h2>6. Data Quality and Limitations</h2>
+                <h2>7. Data Quality and Limitations</h2>
 
                 <p>
                     The quality and reliability of the environmental data used in weather routing
@@ -704,7 +847,7 @@ where \( u_o \) is the eastward current velocity (m/s)<br>
                     to communicate forecast confidence to the user.
                 </p>
 
-                <h3>6.1 Forecast Accuracy Degradation</h3>
+                <h3>7.1 Forecast Accuracy Degradation</h3>
                 <p>
                     All numerical weather prediction products exhibit accuracy degradation with
                     increasing forecast lead time. For GFS 10-metre wind, the root-mean-square error
@@ -749,7 +892,7 @@ where \( u_o \) is the eastward current velocity (m/s)<br>
                     </tbody>
                 </table>
 
-                <h3>6.2 Spatial Resolution Limitations</h3>
+                <h3>7.2 Spatial Resolution Limitations</h3>
                 <p>
                     The 0.083&deg; resolution of CMEMS wave and current products corresponds to
                     approximately 9 km at the equator and approximately 5 km at 55&deg;N latitude.
@@ -764,7 +907,7 @@ where \( u_o \) is the eastward current velocity (m/s)<br>
                     terrain.
                 </p>
 
-                <h3>6.3 Climatological Fallback</h3>
+                <h3>7.3 Climatological Fallback</h3>
                 <p>
                     When the voyage duration exceeds the operational forecast horizon, WindMar's
                     <code>ClimatologyProvider</code> transitions from forecast data to ERA5 monthly
@@ -781,7 +924,7 @@ where \( u_o \) is the eastward current velocity (m/s)<br>
                     long voyage.
                 </p>
 
-                <h3>6.4 Geographic Coverage</h3>
+                <h3>7.4 Geographic Coverage</h3>
                 <p>
                     The data sources used by WindMar provide global coverage with latitude bounds
                     of &minus;85&deg; to +85&deg;, excluding extreme polar regions where sea ice
