@@ -85,6 +85,7 @@
             <ul class="sidebar-menu">
                 <li><a href="#ocean-mask"><i class="fas fa-globe"></i> Ocean Mask</a></li>
                 <li><a href="#api-performance"><i class="fas fa-tachometer-alt"></i> API Performance</a></li>
+                <li><a href="#startup-prefetch"><i class="fas fa-download"></i> Startup Prefetch</a></li>
                 <li><a href="#data-quality"><i class="fas fa-check-circle"></i> Data Quality</a></li>
             </ul>
         </div>
@@ -831,6 +832,182 @@ where \( u_o \) is the eastward current velocity (m/s)<br>
                     &times; ~304K native grid points at 0.083&deg;), which is within the memory budget
                     of a 4-worker Gunicorn deployment.
                 </p>
+
+                <h3 id="startup-prefetch">6.3 Startup Prefetch</h3>
+                <p>
+                    WindMar prefetches all weather fields into the database at application startup,
+                    so that the user never waits for an upstream download when switching layers or
+                    scrubbing the forecast timeline. The prefetch runs automatically in a background
+                    thread immediately after the application lifespan initialises. A PostgreSQL
+                    <a href="https://www.postgresql.org/docs/current/explicit-locking.html#ADVISORY-LOCKS" target="_blank">advisory lock</a>
+                    ensures that only one Gunicorn worker executes the prefetch, even when
+                    multiple workers start concurrently.
+                </p>
+
+                <h4>Architecture</h4>
+                <p>
+                    The prefetch uses a <code>ThreadPoolExecutor</code> with 4 parallel workers,
+                    one per field group. Each worker calls <code>_do_generic_prefetch()</code>,
+                    which downloads all 41 forecast hours for a given field from the upstream
+                    data source (CMEMS or GFS), writes the data to the file cache on disk, and
+                    ingests it into the PostgreSQL <code>weather_grid_data</code> table. The
+                    entire sequence completes before any user interaction occurs and populates
+                    the database for the default viewport.
+                </p>
+
+                <div class="alert info">
+                    <strong><i class="fas fa-info-circle"></i> Data Flow</strong><br>
+                    Without prefetch, single-frame API requests follow the provider chain
+                    Redis &rarr; Database &rarr; Upstream (CMEMS/GFS) &rarr; Synthetic fallback,
+                    and only cache results in Redis (60-second TTL). After prefetch, the
+                    database layer intercepts the request and returns persisted data directly
+                    &mdash; no upstream calls, no waiting.
+                </div>
+
+                <h4>Prefetch Timing (Default Viewport)</h4>
+                <p>
+                    Measured on the default viewport (30&deg;N&ndash;60&deg;N, 30&deg;W&ndash;40&deg;E)
+                    with 4 parallel workers on 24 February 2026. Times include the upstream download,
+                    file cache write, and database ingestion for all 41 forecast hours per field.
+                </p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Source</th>
+                            <th>Forecast Hours</th>
+                            <th>DB Parameters</th>
+                            <th>Prefetch Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Wind</td>
+                            <td>GFS (NOAA)</td>
+                            <td>41</td>
+                            <td>u10, v10 (file cache)</td>
+                            <td>6 s (cached) &ndash; 109 s (cold)</td>
+                        </tr>
+                        <tr>
+                            <td>Waves</td>
+                            <td>CMEMS</td>
+                            <td>41</td>
+                            <td>wave_hs, wave_dir, wave_tp, windwave_hs, windwave_dir, windwave_tp</td>
+                            <td>5 s (cached) &ndash; 17 s</td>
+                        </tr>
+                        <tr>
+                            <td>Swell</td>
+                            <td>CMEMS (shared)</td>
+                            <td>41</td>
+                            <td>swell_hs, swell_dir, swell_tp</td>
+                            <td>4 s (cached) &ndash; 17 s</td>
+                        </tr>
+                        <tr>
+                            <td>Currents</td>
+                            <td>CMEMS</td>
+                            <td>41</td>
+                            <td>current_u, current_v</td>
+                            <td>5 s (cached) &ndash; 10 s</td>
+                        </tr>
+                        <tr>
+                            <td>Sea Surface Temp</td>
+                            <td>CMEMS</td>
+                            <td>41</td>
+                            <td>sst</td>
+                            <td>2 s (cached) &ndash; 35 s</td>
+                        </tr>
+                        <tr>
+                            <td>Ice Concentration</td>
+                            <td>CMEMS</td>
+                            <td>9</td>
+                            <td>ice_siconc</td>
+                            <td>&lt; 1 s (cached) &ndash; 7 s</td>
+                        </tr>
+                        <tr>
+                            <td>Visibility</td>
+                            <td>GFS (NOAA)</td>
+                            <td>41</td>
+                            <td>visibility</td>
+                            <td>81 s (cold) &ndash; 6 s (cached)</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4"><strong>Total (parallel, 4 workers)</strong></td>
+                            <td><strong>~90 s</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <p>
+                    The total wall-clock time is governed by the slowest field group: GFS wind
+                    and visibility, which download individual GRIB2 files for each of the 41
+                    forecast hours. CMEMS fields are faster because the Copernicus Marine API
+                    supports bulk multi-timestep downloads in a single NetCDF request. After
+                    the first run, file cache hits reduce total prefetch time to approximately
+                    10&ndash;15 seconds on subsequent container restarts within the same
+                    forecast model run.
+                </p>
+
+                <h4>Database Contents After Prefetch</h4>
+                <p>
+                    After a successful prefetch, the <code>weather_grid_data</code> table
+                    contains the following rows (measured 24 February 2026):
+                </p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Frames</th>
+                            <th>Grid Size</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>wave_hs, wave_dir, wave_tp</td><td>82 (41 &times; 2 runs)</td><td>361 &times; 841</td></tr>
+                        <tr><td>windwave_hs, windwave_dir, windwave_tp</td><td>82</td><td>361 &times; 841</td></tr>
+                        <tr><td>swell_hs, swell_dir, swell_tp</td><td>82</td><td>361 &times; 841</td></tr>
+                        <tr><td>current_u, current_v</td><td>41</td><td>361 &times; 841</td></tr>
+                        <tr><td>sst</td><td>41</td><td>121 &times; 281</td></tr>
+                        <tr><td>ice_siconc</td><td>9</td><td>121 &times; 281</td></tr>
+                        <tr><td>visibility</td><td>41</td><td>121 &times; 281</td></tr>
+                    </tbody>
+                </table>
+
+                <p>
+                    Wind data is stored in the GFS GRIB2 file cache rather than in PostgreSQL,
+                    because GFS files are already indexed by forecast hour and can be read
+                    directly by <code>cfgrib</code>/<code>xarray</code> without the overhead
+                    of binary serialisation into database rows. The file cache path follows
+                    the pattern: <code>data/copernicus_cache/gfs_wind_YYYYMMDD_HH_fNNN_latX_Y_lonX_Y.grib2</code>.
+                </p>
+
+                <h4>Advisory Lock Mechanism</h4>
+                <p>
+                    Gunicorn typically starts 2&ndash;4 worker processes, each of which
+                    runs the application lifespan independently. Without coordination,
+                    all workers would attempt to download the same data simultaneously,
+                    saturating upstream bandwidth and causing duplicate database inserts.
+                    WindMar uses PostgreSQL session-level advisory locks
+                    (<code>pg_try_advisory_lock(20260224)</code>) to ensure exactly one
+                    worker executes the prefetch. The remaining workers detect the lock
+                    and skip the prefetch entirely, logging
+                    <code>"Another worker is running weather prefetch, skipping"</code>.
+                    The lock is released after prefetch completes (or fails), and all
+                    workers share the database contents written by the single prefetching
+                    worker.
+                </p>
+
+                <div class="alert warning">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Startup Time Budget</strong><br>
+                    The prefetch runs in a daemon thread and does not block the application
+                    from serving HTTP requests. The API is ready immediately after lifespan
+                    initialisation; weather layers served during the prefetch window will
+                    trigger on-demand upstream downloads as usual. Once prefetch completes,
+                    all subsequent requests within the default viewport are served from
+                    the database with sub-second latency.
+                </div>
             </section>
 
             <!-- ============================================================ -->
