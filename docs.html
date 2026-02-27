@@ -184,9 +184,24 @@
                 <div class="alert" style="background: rgba(76, 175, 80, 0.08); border-left: 4px solid #4caf50; padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
                     <strong><i class="fas fa-code-branch"></i> Development Log</strong>
                     <span style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(76, 175, 80, 0.12); border: 1px solid rgba(76, 175, 80, 0.3); color: #66bb6a; padding: 0.15rem 0.65rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 600; margin-left: 0.5rem; vertical-align: middle;">
-                        <i class="fas fa-tag"></i> v0.1.0 &mdash; Last Stable
+                        <i class="fas fa-tag"></i> v0.1.3 &mdash; Last Stable
                     </span>
                     <table style="width: 100%; margin-top: 0.75rem; font-size: 0.9rem; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af; width: 5rem;"><strong>v0.1.3</strong></td>
+                            <td style="padding: 0.35rem 0.5rem; color: #6b7280; width: 6rem;">2026-02-27</td>
+                            <td style="padding: 0.35rem 0;">Global weather coverage (7 layers, &plusmn;60&deg; lat, raster tiles &rarr; client-side canvas), WMO-standard wind barbs (calm circle, pennants, half/full barbs), calm wind zone coloring, double-buffered canvas rendering, gzip weather cache, ice land masking, SST coastline bleed fix, currents-over-land fix, settings page 2-column card layout, ~72K LOC</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af; width: 5rem;"><strong>v0.1.2</strong></td>
+                            <td style="padding: 0.35rem 0.5rem; color: #6b7280; width: 6rem;">2026-02-25</td>
+                            <td style="padding: 0.35rem 0;">Dedicated Settings page with optimization engine configuration and educational content, per-leg variable speed optimization (fuel ~ speed&sup3;), session persistence (sessionStorage-backed React Context), demo mode hardening (locked viewport, hidden uploads, frozen weather), Dijkstra node budget reduction</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                            <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af; width: 5rem;"><strong>v0.1.1</strong></td>
+                            <td style="padding: 0.35rem 0.5rem; color: #6b7280; width: 6rem;">2026-02-24</td>
+                            <td style="padding: 0.35rem 0;">Weather pipeline fixes: wind DB rebuild, SST black holes, wave OOM crash, weather debug endpoint, cache versioning, NaN sentinels, viewport margin &amp; latitude cap widening (&plusmn;55&deg; &rarr; &plusmn;60&deg;)</td>
+                        </tr>
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
                             <td style="padding: 0.35rem 0; white-space: nowrap; color: #9ca3af; width: 5rem;"><strong>v0.1.0</strong></td>
                             <td style="padding: 0.35rem 0.5rem; color: #6b7280; width: 6rem;">2026-02-22</td>
