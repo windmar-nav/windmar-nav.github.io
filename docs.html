@@ -684,7 +684,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
 
                 <div class="formula-block">
                     <div class="formula-title">Holtrop-Mennen Form Factor for Tankers</div>
-                    \[k_1 = 0.93 + 0.4871 \cdot \frac{B}{L_{pp}} - 0.2156 \cdot \frac{B}{T} + 0.1027 \cdot C_b\]
+                    \[k_1 = \max\!\bigl(0.1,\; 0.93 + 0.4871 \cdot \frac{B}{L_{pp}} - 0.2156 \cdot \frac{B}{T} + 0.1027 \cdot C_b\bigr)\]
                     <div class="formula-where">
                         <p>Default MR tanker values:</p>
                         <ul>
@@ -711,18 +711,21 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                 </p>
 
                 <div class="formula-block">
-                    <div class="formula-title">Wave-Making Resistance</div>
-                    \[R_w = c_1 \cdot c_7 \cdot \Delta \cdot \rho_{sw} \cdot g \cdot e^{-0.4 \cdot Fr^{-2}} \quad \text{for } Fr < 0.4\]
-                    \[R_w = 0 \quad \text{for } Fr \ge 0.4\]
+                    <div class="formula-title">Wave-Making Resistance (simplified empirical)</div>
+                    \[R_w = 4.0 \cdot Fr^2 \cdot R_f\]
                     <div class="formula-where">
                         <p>Where:</p>
                         <ul>
                             <li>\(Fr = \frac{V}{\sqrt{g \cdot L_{pp}}}\) (Froude number)</li>
-                            <li>\(c_1 = 2223105 \cdot C_b^{3.78613} \cdot (T/B)^{1.07961}\)</li>
-                            <li>\(c_7 = 0.229577 \cdot (B/L_{pp})^{1/3}\)</li>
-                            <li>\(\Delta\) = displacement (tonnes)</li>
+                            <li>\(R_f\) = frictional resistance (including form factor)</li>
                             <li>\(g = 9.81 \; \text{m/s}^2\)</li>
                         </ul>
+                        <p>
+                            For tankers with \(C_b > 0.75\) at low Froude numbers (\(Fr < 0.25\)),
+                            \(R_w\) is a small fraction of total resistance, scaling quadratically with \(Fr\).
+                            This simplified form avoids the full Holtrop-Mennen exponential coefficients
+                            while remaining accurate for the operational speed range of merchant vessels.
+                        </p>
                     </div>
                 </div>
 
@@ -796,21 +799,22 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                 </div>
 
                 <div class="formula-block">
-                    <div class="formula-title">Wind Force Coefficients</div>
-                    <p>Longitudinal coefficient:</p>
-                    \[C_x = -0.6 \cdot \cos(\theta_{\text{rel}}) + 0.8 \cdot \cos^2(\theta_{\text{rel}})\]
+                    <div class="formula-title">Longitudinal Drag Coefficient</div>
+                    <p>Simplified Blendermann for merchant vessels:</p>
+                    \[C_{x,\text{drag}} = 0.8 \cdot \cos(\theta_{\text{rel}})\]
+                    <p>Only the positive (opposing) component is used: \(C_{x,\text{drag}} = \max(0,\; C_{x,\text{drag}})\).</p>
                     <p>Transverse coefficient:</p>
-                    \[C_y = 0.9 \cdot \sin(\theta_{\text{rel}})\]
+                    \[C_y = 0.9 \cdot |\sin(\theta_{\text{rel}})|\]
                 </div>
 
                 <div class="formula-block">
                     <div class="formula-title">Wind Forces and Total Resistance</div>
-                    <p>Longitudinal force:</p>
-                    \[F_x = \tfrac{1}{2} \cdot \rho_{\text{air}} \cdot V_{\text{wind}}^2 \cdot A_{\text{frontal}} \cdot |C_x|\]
-                    <p>Transverse force:</p>
-                    \[F_y = \tfrac{1}{2} \cdot \rho_{\text{air}} \cdot V_{\text{wind}}^2 \cdot A_{\text{lateral}} \cdot |C_y|\]
+                    <p>Direct (longitudinal) resistance:</p>
+                    \[R_{\text{direct}} = \max(0,\; C_{x,\text{drag}}) \cdot \tfrac{1}{2} \cdot \rho_{\text{air}} \cdot V_{\text{wind}}^2 \cdot A_{\text{frontal}}\]
+                    <p>Drift-induced resistance (10% of transverse force):</p>
+                    \[R_{\text{drift}} = 0.1 \cdot C_y \cdot \tfrac{1}{2} \cdot \rho_{\text{air}} \cdot V_{\text{wind}}^2 \cdot A_{\text{lateral}}\]
                     <p>Total wind resistance:</p>
-                    \[R_{\text{wind}} = F_x + 0.1 \cdot F_y\]
+                    \[R_{\text{wind}} = R_{\text{direct}} + R_{\text{drift}}\]
                     <div class="formula-where">
                         <p>Where:</p>
                         <ul>
@@ -862,43 +866,58 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
 
                 <p>
                     Wave added resistance is the increase in hull resistance caused by the vessel's interaction with
-                    ocean waves. WindMar uses the Kwon empirical formula, which estimates added resistance as a function
-                    of significant wave height, beam, Froude number, and the encounter angle between the vessel heading
-                    and the dominant wave direction.
+                    ocean waves. WindMar supports two methods: STAWAVE-1 (ISO 15016, default) and the Kwon empirical
+                    speed-loss method. The Kwon method estimates added resistance by converting percentage speed loss
+                    into equivalent resistance using the cubic power-speed relationship.
                 </p>
 
-                <h3>Kwon Empirical Formula</h3>
+                <h3>Kwon Speed-Loss Method</h3>
 
                 <div class="formula-block">
-                    <div class="formula-title">Wave Added Resistance</div>
-                    \[R_{\text{wave}} = f_{\text{dir}} \cdot 4.5 \cdot \rho_{sw} \cdot g \cdot B \cdot H_s^2 \cdot (1 + Fr)\]
-                    <p>Directional factor:</p>
-                    \[f_{\text{dir}} = \frac{1 + \cos(\theta_{\text{encounter}})}{2}\]
+                    <div class="formula-title">Base Speed Loss Coefficient</div>
+                    \[\Delta V_{\text{base}} = 3.0 \cdot (1.7 - 0.9 \cdot C_b) \cdot \max\bigl(0.5,\; \min(1.5,\; 180 / L_{pp})\bigr)\]
+                    <p>This gives a percentage speed loss per metre of significant wave height for head seas.
+                       Higher \(C_b\) reduces speed loss; shorter vessels lose more speed.</p>
+                </div>
+
+                <div class="formula-block">
+                    <div class="formula-title">Directional Reduction Factor</div>
+                    <p>A stepped function of relative encounter angle \(\theta\):</p>
+                    <table>
+                        <thead><tr><th>Encounter Angle</th><th>\(f_{\text{dir}}\)</th></tr></thead>
+                        <tbody>
+                            <tr><td>0&deg;&ndash;30&deg; (head seas)</td><td>1.0</td></tr>
+                            <tr><td>30&deg;&ndash;60&deg;</td><td>0.9</td></tr>
+                            <tr><td>60&deg;&ndash;90&deg; (beam)</td><td>0.7</td></tr>
+                            <tr><td>90&deg;&ndash;150&deg;</td><td>0.4</td></tr>
+                            <tr><td>150&deg;&ndash;180&deg; (following)</td><td>0.2</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="formula-block">
+                    <div class="formula-title">Speed Loss to Equivalent Resistance</div>
+                    \[\Delta V_{\%} = \min\bigl(50,\; \Delta V_{\text{base}} \cdot H_s \cdot f_{\text{dir}}\bigr)\]
+                    <p>The percentage speed loss is converted to an equivalent added resistance
+                       using the cubic power-speed relationship (\(P \propto V^3\)):</p>
+                    \[R_{\text{wave}} = R_{\text{calm}} \cdot 2.0 \cdot \frac{\Delta V_{\%}}{100}\]
                     <div class="formula-where">
-                        <p>Values by encounter angle:</p>
-                        <ul>
-                            <li>Head seas (\(\theta = 0°\)): \(f_{\text{dir}} = 1.0\)</li>
-                            <li>Bow quarter (\(\theta = 45°\)): \(f_{\text{dir}} = 0.85\)</li>
-                            <li>Beam seas (\(\theta = 90°\)): \(f_{\text{dir}} = 0.5\)</li>
-                            <li>Stern quarter (\(\theta = 135°\)): \(f_{\text{dir}} = 0.15\)</li>
-                            <li>Following seas (\(\theta = 180°\)): \(f_{\text{dir}} = 0.0\)</li>
-                        </ul>
                         <p>Where:</p>
                         <ul>
                             <li>\(H_s\) = significant wave height (m)</li>
-                            <li>\(B\) = beam (m)</li>
-                            <li>\(Fr = \frac{V}{\sqrt{g \cdot L_{pp}}}\) (Froude number)</li>
-                            <li>\(\rho_{sw} = 1025 \; \text{kg/m}^3\)</li>
-                            <li>\(g = 9.81 \; \text{m/s}^2\)</li>
+                            <li>\(C_b\) = block coefficient (0.82 laden, 0.75 ballast)</li>
+                            <li>\(L_{pp}\) = length between perpendiculars (m)</li>
+                            <li>\(R_{\text{calm}}\) = Holtrop-Mennen calm water resistance at current speed</li>
                         </ul>
                     </div>
                 </div>
 
                 <p>
-                    The Kwon formula produces a quadratic dependence on wave height: doubling H_s from 2 m to 4 m
-                    increases wave added resistance by a factor of four. The directional factor ensures that head seas
-                    produce maximum added resistance while following seas produce none, which matches the physical
-                    expectation that waves opposing the vessel's motion cause the greatest speed loss.
+                    The Kwon method produces a quadratic dependence on wave height: doubling \(H_s\) from 2 m to 4 m
+                    doubles the speed loss percentage, which doubles the added resistance. The stepped directional
+                    factor ensures that head seas produce maximum added resistance while following seas retain a
+                    residual 20% effect, reflecting the fact that even stern waves cause some added resistance
+                    through ship-motion coupling.
                 </p>
 
                 <h3>Dual Wave Method (v0.0.8)</h3>
@@ -990,7 +1009,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                 <p>
                     The engine load is clamped to the range [0.15, 1.0]. Below 15% load, the engine is considered
                     non-operational. Above 100% MCR, the engine cannot deliver more power, so the brake power is
-                    capped at P_MCR = 8,840 kW.
+                    capped at P_MCR = 6,600 kW.
                 </p>
 
                 <h3>SFOC Calibration Factor (v0.0.8)</h3>
@@ -1057,7 +1076,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                     <p>Combined propulsive efficiency:</p>
                     \[\eta_{\text{total}} = \eta_{\text{prop}} \cdot \eta_{\text{hull}} \cdot \eta_{\text{rre}} = 0.65 \times 1.05 \times 1.00 = 0.6825\]
                     <p>Power capped at MCR:</p>
-                    \[P_{\text{brake}} = \min(P_{\text{brake}},\; P_{MCR}) \quad \text{where } P_{MCR} = 8{,}840 \; \text{kW}\]
+                    \[P_{\text{brake}} = \min(P_{\text{brake}},\; P_{MCR}) \quad \text{where } P_{MCR} = 6{,}600 \; \text{kW}\]
                 </div>
 
                 <p>
@@ -1268,7 +1287,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                             <td>Vertical acceleration</td>
                             <td>&lt; 0.2g</td>
                             <td>0.2g &ndash; 0.3g</td>
-                            <td>&gt; 0.3g</td>
+                            <td>&gt; 0.5g</td>
                         </tr>
                         <tr>
                             <td>Slamming probability</td>
@@ -1443,7 +1462,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                             <li>Add to priority queue</li>
                         </ul>
                     </li>
-                    <li>Terminate if cells explored exceeds 50,000 (safety limit)</li>
+                    <li>Terminate if cells explored exceeds 200,000 (A*) or 150,000 (Dijkstra)</li>
                 </ol>
 
                 <h3>Cost Calculation Code</h3>
@@ -1739,31 +1758,35 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                 <h2>Strait Visibility Graph</h2>
 
                 <p>
-                    Eight pre-validated shipping straits are modelled as visibility graph edges, allowing the optimizer
+                    Nine pre-validated shipping straits are modelled as visibility graph edges, allowing the optimizer
                     to transit narrow passages that would be blocked or poorly represented by the regular grid.
+                    Gibraltar is split into separate eastbound and westbound straits for TSS compliance.
                 </p>
 
                 <h3>Supported Straits</h3>
                 <table>
                     <thead>
-                        <tr><th>Strait</th><th>Width</th><th>Notes</th></tr>
+                        <tr><th>Code</th><th>Strait</th><th>Notes</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>Gibraltar</td><td>14&thinsp;km</td><td>Atlantic&ndash;Mediterranean gateway</td></tr>
-                        <tr><td>English Channel</td><td>34&thinsp;km</td><td>Dover TSS mandatory</td></tr>
-                        <tr><td>Dover Strait</td><td>34&thinsp;km</td><td>Busiest shipping lane globally</td></tr>
-                        <tr><td>Malacca</td><td>2.8&thinsp;km (min)</td><td>Asia&ndash;Europe critical chokepoint</td></tr>
-                        <tr><td>Singapore</td><td>16&thinsp;km</td><td>Keppel Channel approach</td></tr>
-                        <tr><td>Suez Approach</td><td>&mdash;</td><td>Port Said entry/exit waypoints</td></tr>
-                        <tr><td>Bab el-Mandeb</td><td>26&thinsp;km</td><td>Red Sea&ndash;Gulf of Aden</td></tr>
-                        <tr><td>Hormuz</td><td>39&thinsp;km</td><td>Persian Gulf exit</td></tr>
+                        <tr><td>GIBR_EB</td><td>Gibraltar &mdash; Eastbound</td><td>Atlantic&rarr;Mediterranean; one-way TSS lane</td></tr>
+                        <tr><td>GIBR_WB</td><td>Gibraltar &mdash; Westbound</td><td>Mediterranean&rarr;Atlantic; one-way TSS lane</td></tr>
+                        <tr><td>DOVR</td><td>Dover Strait</td><td>34&thinsp;km; busiest shipping lane globally</td></tr>
+                        <tr><td>MLCA</td><td>Malacca Strait</td><td>2.8&thinsp;km min; Asia&ndash;Europe critical chokepoint</td></tr>
+                        <tr><td>HRMZ</td><td>Hormuz</td><td>39&thinsp;km; Persian Gulf exit</td></tr>
+                        <tr><td>BABE</td><td>Bab el-Mandeb</td><td>26&thinsp;km; Red Sea&ndash;Gulf of Aden</td></tr>
+                        <tr><td>BOSP</td><td>Bosporus</td><td>~700&thinsp;m; narrow (GSHHS-i cannot resolve)</td></tr>
+                        <tr><td>SUEZ</td><td>Suez Approach</td><td>Port Said approach waypoints; canal is narrow</td></tr>
+                        <tr><td>MESS</td><td>Messina</td><td>3.1&thinsp;km; Tyrrhenian&ndash;Ionian passage</td></tr>
                     </tbody>
                 </table>
 
                 <p>
-                    Each strait is defined as a pair of entry/exit waypoints with pre-validated coordinates verified
-                    against navigational charts. The visibility graph merges these edges into the main routing graph
-                    so the optimizer can choose strait transit naturally as part of the shortest-path search.
+                    Each strait is defined as an ordered sequence of safe waypoints (not just entry/exit) with
+                    pre-validated coordinates verified against navigational charts. The visibility graph merges these
+                    edges into the main routing graph so the optimizer can choose strait transit naturally as part of
+                    the shortest-path search. Narrow straits (Bosporus, Suez) skip the GSHHS land-crossing check
+                    because the coastline resolution cannot resolve sub-kilometre channels.
                 </p>
             </section>
 
@@ -1857,11 +1880,11 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td><strong>A</strong> (Superior)</td><td>Attained &le; 0.86 &times; Required</td></tr>
-                        <tr><td><strong>B</strong> (Good)</td><td>0.86 &lt; Attained &le; 0.94 &times; Required</td></tr>
-                        <tr><td><strong>C</strong> (Moderate)</td><td>0.94 &lt; Attained &le; 1.06 &times; Required</td></tr>
-                        <tr><td><strong>D</strong> (Below average)</td><td>1.06 &lt; Attained &le; 1.18 &times; Required</td></tr>
-                        <tr><td><strong>E</strong> (Inferior)</td><td>Attained &gt; 1.18 &times; Required</td></tr>
+                        <tr><td><strong>A</strong> (Superior)</td><td>Attained &le; 0.82 &times; Required</td></tr>
+                        <tr><td><strong>B</strong> (Good)</td><td>0.82 &lt; Attained &le; 0.93 &times; Required</td></tr>
+                        <tr><td><strong>C</strong> (Moderate)</td><td>0.93 &lt; Attained &le; 1.08 &times; Required</td></tr>
+                        <tr><td><strong>D</strong> (Below average)</td><td>1.08 &lt; Attained &le; 1.28 &times; Required</td></tr>
+                        <tr><td><strong>E</strong> (Inferior)</td><td>Attained &gt; 1.28 &times; Required</td></tr>
                     </tbody>
                 </table>
 
@@ -2247,7 +2270,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
   ],
   "departure_time": "2026-02-10T08:00:00Z",
   "vessel_condition": "laden",
-  "speed_kts": 14.5
+  "speed_kts": 13.0
 }</code></pre>
                 </div>
 
@@ -2295,10 +2318,10 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
   "displacement_laden": 65000,
   "displacement_ballast": 20000,
   "dwt": 49000,
-  "mcr_kw": 8840,
+  "mcr_kw": 6600,
   "sfoc_mcr": 171,
-  "service_speed_laden": 14.5,
-  "service_speed_ballast": 15.0
+  "service_speed_laden": 13.0,
+  "service_speed_ballast": 13.0
 }</code></pre>
                 </div>
 
@@ -2352,7 +2375,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                     <p><strong>Request Body (Mode 2 &mdash; Target Speed):</strong></p>
                     <pre><code>{
   "is_laden": true,
-  "calm_speed_kts": 14.5,
+  "calm_speed_kts": 13.0,
   "wind_speed_kts": 25,
   "wind_relative_deg": 0,
   "wave_height_m": 3.0,
@@ -2390,26 +2413,35 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                     <p class="endpoint-description">Returns the complete vessel model state: all 20 VesselSpecs fields (grouped by dimensions, engine, areas), current calibration factors with timestamp, active wave method, and computed values (optimal speeds, fuel at service speed).</p>
                     <p><strong>Response (abbreviated):</strong></p>
                     <pre><code>{
-  "specs": {
-    "loa": 183.0, "lpp": 176.0, "beam": 32.0,
-    "draft_laden": 11.8, "draft_ballast": 6.5,
-    "displacement_laden": 65000, "displacement_ballast": 20000,
-    "dwt": 49000, "block_coefficient": 0.82,
-    "wetted_surface_area": 8200.0,
-    "mcr_kw": 8840, "sfoc_mcr": 171,
-    "service_speed_laden": 14.5, "service_speed_ballast": 15.0,
-    "frontal_area_laden": 450, "frontal_area_ballast": 850,
-    "lateral_area_laden": 2100, "lateral_area_ballast": 2800,
-    "days_since_drydock": 180, "hull_roughness": 150
+  "specifications": {
+    "dimensions": {
+      "loa": 183.0, "lpp": 176.0, "beam": 32.0,
+      "draft_laden": 11.8, "draft_ballast": 6.5,
+      "dwt": 49000, "displacement_laden": 65000, "displacement_ballast": 20000
+    },
+    "hull_form": {
+      "cb_laden": 0.82, "cb_ballast": 0.75,
+      "wetted_surface_laden": 7500, "wetted_surface_ballast": 5200
+    },
+    "engine": {
+      "mcr_kw": 6600, "sfoc_at_mcr": 171,
+      "service_speed_laden": 13.0, "service_speed_ballast": 13.0
+    },
+    "areas": {
+      "frontal_area_laden": 450, "frontal_area_ballast": 850,
+      "lateral_area_laden": 2100, "lateral_area_ballast": 2800
+    }
   },
   "calibration": {
-    "calm_water": 1.12, "wind": 0.95,
-    "waves": 1.08, "sfoc_factor": 1.03
+    "calibrated": true,
+    "factors": {"calm_water": 1.12, "wind": 0.95, "waves": 1.08, "sfoc_factor": 1.03},
+    "calibrated_at": "2026-02-15T10:30:00Z",
+    "num_reports_used": 45, "calibration_error_mt": 0.82, "days_since_drydock": 180
   },
   "wave_method": "stawave1",
   "computed": {
-    "optimal_speed_laden_kts": 12.8,
-    "optimal_speed_ballast_kts": 13.5
+    "optimal_speed_laden_kts": 11.5,
+    "optimal_speed_ballast_kts": 12.0
   }
 }</code></pre>
                 </div>
@@ -2421,10 +2453,10 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                     <p><strong>Response:</strong></p>
                     <pre><code>{
   "scenarios": [
-    {"label": "Eco Speed", "speed_kts": 11.0, "fuel_mt_per_day": 18.2, "engine_load_pct": 45},
-    {"label": "Service Speed", "speed_kts": 14.5, "fuel_mt_per_day": 32.1, "engine_load_pct": 85},
-    {"label": "Full Speed", "speed_kts": 15.5, "fuel_mt_per_day": 39.8, "engine_load_pct": 100},
-    {"label": "Ballast Eco", "speed_kts": 12.0, "fuel_mt_per_day": 20.5, "engine_load_pct": 48}
+    {"name": "Calm Water (Laden)", "conditions": "13.0 kts, no wind/waves", "fuel_mt": 24.5, "power_kw": 4200},
+    {"name": "Head Wind (Laden)", "conditions": "13.0 kts, 20 kt head wind", "fuel_mt": 28.1, "power_kw": 4800},
+    {"name": "Rough Seas (Laden)", "conditions": "13.0 kts, 3m waves", "fuel_mt": 30.3, "power_kw": 5200},
+    {"name": "Calm Water (Ballast)", "conditions": "13.0 kts, no wind/waves", "fuel_mt": 22.8, "power_kw": 3900}
   ]
 }</code></pre>
                 </div>
@@ -2885,7 +2917,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
     {"lat": 51.95, "lon": 4.05, "name": "Rotterdam"},
     {"lat": 37.23, "lon": 15.22, "name": "Augusta"}
   ],
-  "calm_speed_kts": 14.5,
+  "calm_speed_kts": 13.0,
   "is_laden": true,
   "departure_time": "2026-02-10T06:00:00Z",
   "n_simulations": 100
