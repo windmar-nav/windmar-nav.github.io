@@ -513,6 +513,60 @@
     </div>
 </div>
 
+<!-- Limitations -->
+<section class="philosophy">
+    <div class="section" style="padding-top: 4rem; padding-bottom: 4rem;">
+        <div class="section-label"><i class="fas fa-exclamation-circle"></i> Limitations (v0.1.5)</div>
+        <h2>What this release does not do</h2>
+        <p class="section-desc">
+            WindMar is an active open-source project. The current release has the following constraints.
+        </p>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <th style="text-align: left; padding: 0.75rem 1rem; color: #fff; font-weight: 600;">Constraint</th>
+                        <th style="text-align: left; padding: 0.75rem 1rem; color: #fff; font-weight: 600;">Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 0.6rem 1rem; color: var(--text-light); white-space: nowrap;">Forecast horizon</td>
+                        <td style="padding: 0.6rem 1rem; color: var(--text-dim);">5 days (GFS f000&ndash;f120). No historical reanalysis.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 0.6rem 1rem; color: var(--text-light); white-space: nowrap;">Wind source</td>
+                        <td style="padding: 0.6rem 1rem; color: var(--text-dim);">NOAA GFS (0.25&deg;). Free, no credentials needed.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 0.6rem 1rem; color: var(--text-light); white-space: nowrap;">Wave / current source</td>
+                        <td style="padding: 0.6rem 1rem; color: var(--text-dim);">CMEMS. Requires a free Copernicus Marine account.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 0.6rem 1rem; color: var(--text-light); white-space: nowrap;">ERA5</td>
+                        <td style="padding: 0.6rem 1rem; color: var(--text-dim);">Not active in this release. CDS credentials accepted but ingestion is disabled.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 0.6rem 1rem; color: var(--text-light); white-space: nowrap;">Coverage</td>
+                        <td style="padding: 0.6rem 1rem; color: var(--text-dim);">North Atlantic / NW Europe (ADRS 1+2). Configurable via area selection.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 0.6rem 1rem; color: var(--text-light); white-space: nowrap;">Data refresh</td>
+                        <td style="padding: 0.6rem 1rem; color: var(--text-dim);">Manual &mdash; user triggers resync per layer. No background scheduler.</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.6rem 1rem; color: var(--text-light); white-space: nowrap;">Vessel type</td>
+                        <td style="padding: 0.6rem 1rem; color: var(--text-dim);">Calibrated for MR product tankers. Other vessel types require parameter adjustment.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p style="margin-top: 1.5rem; font-size: 0.88rem; color: var(--text-dim);">
+            For voyages beyond the 5-day forecast window, the system uses climatological fallback values (monthly averages).
+        </p>
+    </div>
+</section>
+
 <!-- Install CTA -->
 <section class="demo-section">
     <div class="hero-badge" style="margin-bottom: 1.5rem;"><i class="fas fa-download"></i> Try It Locally</div>
@@ -529,6 +583,21 @@ docker compose -f docker-compose.standalone.yml up -d</code></pre>
         </a>
         <a href="mailto:contact@slmar.co" class="btn btn-ghost">
             <i class="fas fa-envelope"></i> Contact
+        </a>
+    </div>
+</section>
+
+<!-- Sponsor CTA -->
+<section class="section" style="text-align: center; padding-bottom: 3rem;">
+    <div style="max-width: 540px; margin: 0 auto; background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(251, 191, 36, 0.04) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 2.5rem 2rem;">
+        <i class="fas fa-heart" style="font-size: 1.5rem; color: var(--amber); margin-bottom: 1rem; display: block;"></i>
+        <h3 style="font-size: 1.25rem; color: #fff; margin-bottom: 0.75rem;">Support Open-Source Weather Routing</h3>
+        <p style="font-size: 0.92rem; color: var(--text-light); line-height: 1.7; margin-bottom: 1.5rem;">
+            WindMar is free and open source. Sponsorships help fund development of
+            ERA5 reanalysis, global coverage, automated weather refresh, and new vessel types.
+        </p>
+        <a href="https://github.com/sponsors/windmar-nav" class="btn btn-primary" target="_blank" style="background: var(--amber); color: #000;">
+            <i class="fas fa-heart"></i> Sponsor on GitHub
         </a>
     </div>
 </section>

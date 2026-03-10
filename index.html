@@ -56,6 +56,7 @@
                 <li><a href="#overview"><i class="fas fa-home"></i> Overview</a></li>
                 <li><a href="#architecture"><i class="fas fa-sitemap"></i> Architecture</a></li>
                 <li><a href="#installation"><i class="fas fa-download"></i> Installation</a></li>
+                <li><a href="#limitations"><i class="fas fa-exclamation-circle"></i> Limitations</a></li>
                 <li><a href="#tech-stack"><i class="fas fa-layer-group"></i> Tech Stack</a></li>
             </ul>
         </div>
@@ -556,6 +557,36 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                     Never commit <code>.env</code> to version control. The <code>.gitignore</code> excludes it by default.
                     See <code>.env.example</code> for all available variables with descriptions.
                 </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- LIMITATIONS -->
+            <!-- ============================================================ -->
+            <section id="limitations">
+                <h2>Limitations (v0.1.5)</h2>
+                <p>
+                    This release uses <strong>GFS forecast data only</strong> (5-day horizon, 3-hourly steps).
+                    There is no ERA5 reanalysis ingestion &mdash; if GFS data is unavailable, the system
+                    falls back to synthetic data for wind.
+                </p>
+                <table>
+                    <thead>
+                        <tr><th>Constraint</th><th>Detail</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Forecast horizon</td><td>5 days (GFS f000&ndash;f120). No historical reanalysis.</td></tr>
+                        <tr><td>Wind source</td><td>NOAA GFS (0.25&deg;). Free, no credentials needed.</td></tr>
+                        <tr><td>Wave / current source</td><td>CMEMS. Requires a free Copernicus Marine account.</td></tr>
+                        <tr><td>ERA5</td><td>Not included in this release. CDS credentials are accepted but ERA5 ingestion is not active.</td></tr>
+                        <tr><td>Coverage</td><td>North Atlantic / NW Europe (ADRS 1+2). Configurable via area selection.</td></tr>
+                        <tr><td>Data refresh</td><td>Manual &mdash; user triggers resync per layer. No background scheduler.</td></tr>
+                        <tr><td>Vessel type</td><td>Calibrated for MR product tankers. Other vessel types require parameter adjustment.</td></tr>
+                    </tbody>
+                </table>
+                <p>
+                    For voyages beyond the 5-day forecast window, the system uses climatological fallback
+                    values (monthly averages).
+                </p>
             </section>
 
             <!-- ============================================================ -->
