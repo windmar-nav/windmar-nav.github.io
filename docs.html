@@ -184,7 +184,7 @@
                 <div class="alert" style="background: rgba(76, 175, 80, 0.08); border-left: 4px solid #4caf50; padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
                     <strong><i class="fas fa-code-branch"></i> Development Log</strong>
                     <span style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(76, 175, 80, 0.12); border: 1px solid rgba(76, 175, 80, 0.3); color: #66bb6a; padding: 0.15rem 0.65rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 600; margin-left: 0.5rem; vertical-align: middle;">
-                        <i class="fas fa-tag"></i> v0.1.3 &mdash; Last Stable
+                        <i class="fas fa-tag"></i> v0.1.5 &mdash; Latest Stable
                     </span>
                     <table style="width: 100%; margin-top: 0.75rem; font-size: 0.9rem; border-collapse: collapse;">
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
@@ -276,8 +276,8 @@
                 </p>
                 <p>
                     The system ingests near-real-time wind data from NOAA GFS (0.25&deg; resolution, via NOMADS),
-                    wave, current, SST, swell, visibility, and ice data from Copernicus Marine Service (CMEMS), with ERA5 reanalysis as a
-                    secondary wind fallback. Weather grids are pre-ingested into PostgreSQL on a 6-hourly cycle
+                    wave, current, SST, swell, visibility, and ice data from Copernicus Marine Service (CMEMS).
+                    Weather grids are pre-ingested into PostgreSQL via user-triggered resync
                     (wind, waves, currents, ice), with on-demand prefetch for SST, visibility, and swell &mdash; enabling sub-second route calculations.
                     A forecast timeline (f000&ndash;f120, 3-hourly steps) supports all 7 weather layers with play/pause and scrubbing.
                     The interface uses a <strong>two-mode architecture</strong>: <em>Weather mode</em> presents a full-screen ECDIS-style
@@ -344,7 +344,7 @@
                             <li>7 layers: wind, waves, currents, swell, SST, visibility, ice</li>
                             <li>Forecast timeline for all layers (5-day, 3h steps)</li>
                             <li>WMO-standard color ramps per field</li>
-                            <li>6-hourly DB ingestion + on-demand prefetch</li>
+                            <li>User-triggered resync + on-demand prefetch</li>
                         </ul>
                     </div>
                     <div class="feature-card">
@@ -407,8 +407,8 @@
                         </tr>
                         <tr>
                             <td>Weather Provider</td>
-                            <td>NOAA GFS / CMEMS / ERA5</td>
-                            <td>GFS wind, CMEMS waves/currents/SST/swell/visibility/ice, ERA5 fallback, 5-day forecast</td>
+                            <td>NOAA GFS / CMEMS</td>
+                            <td>GFS wind, CMEMS waves/currents/SST/swell/visibility/ice, climatology fallback, 5-day forecast</td>
                         </tr>
                         <tr>
                             <td>Database</td>
@@ -502,7 +502,7 @@ npm run dev</code></pre>
                         <tr><th>Data Type</th><th>Primary Source</th><th>Fallback</th><th>Credentials</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>Wind</td><td>NOAA GFS (0.25&deg;)</td><td>ERA5 &rarr; Synthetic</td><td>None (free)</td></tr>
+                        <tr><td>Wind</td><td>NOAA GFS (0.25&deg;)</td><td>Synthetic</td><td>None (free)</td></tr>
                         <tr><td>Waves</td><td>CMEMS wave model</td><td>Synthetic</td><td>CMEMS account</td></tr>
                         <tr><td>Currents</td><td>CMEMS physics model</td><td>Synthetic</td><td>CMEMS account</td></tr>
                         <tr><td>Forecast</td><td>GFS f000&ndash;f120 (5-day)</td><td>&mdash;</td><td>None</td></tr>
@@ -523,11 +523,7 @@ npm run dev</code></pre>
                 <pre><code>COPERNICUSMARINE_SERVICE_USERNAME=your_username
 COPERNICUSMARINE_SERVICE_PASSWORD=your_password</code></pre>
 
-                <p><strong>CDS ERA5</strong> (wind fallback): Register at
-                    <a href="https://cds.climate.copernicus.eu/" target="_blank">cds.climate.copernicus.eu</a>,
-                    copy your Personal Access Token from your profile, then set:
-                </p>
-                <pre><code>CDSAPI_KEY=your_personal_access_token</code></pre>
+                <p><strong>CDS ERA5</strong> (not active in v0.1.5): Code exists for ERA5 reanalysis as a wind fallback, but ingestion is disabled in this release. CDS credentials are accepted but not used.</p>
 
                 <h3>Environment Variables</h3>
                 <p>Copy <code>.env.example</code> to <code>.env</code> and configure. Key variables:</p>
@@ -611,7 +607,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                     </thead>
                     <tbody>
                         <tr><td>Copernicus CMEMS</td><td>Significant wave height, wave period, wave direction</td><td>0.25 deg, 3-hourly</td></tr>
-                        <tr><td>ERA5 Reanalysis</td><td>10m wind speed, wind direction</td><td>0.25 deg, hourly</td></tr>
+                        <tr><td>ERA5 Reanalysis</td><td>10m wind speed, wind direction (not active in v0.1.5)</td><td>0.25 deg, hourly</td></tr>
                         <tr><td>Copernicus CMEMS</td><td>Ocean current speed and direction</td><td>0.083 deg, daily</td></tr>
                     </tbody>
                 </table>
@@ -2107,7 +2103,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
 
                 <p>
                     The Weather API provides access to weather fields for the route optimization
-                    grid and map visualization. Wind data is sourced from NOAA GFS (primary) with ERA5 fallback.
+                    grid and map visualization. Wind data is sourced from NOAA GFS (primary) with synthetic fallback.
                     Wave and current data comes from Copernicus CMEMS. Weather fields are cached in-memory for
                     repeated queries. See <a href="weather-data.html">Weather Data Acquisition</a> for full details.
                 </p>
@@ -2125,7 +2121,7 @@ CDSAPI_KEY=your_cds_personal_access_token</code></pre>
                         <li><code>resolution</code> &mdash; Grid resolution in degrees (default: 0.25)</li>
                         <li><code>time</code> &mdash; Optional ISO 8601 datetime</li>
                     </ul>
-                    <p><strong>Response:</strong> JSON with <code>lats</code>, <code>lons</code>, <code>u</code>, <code>v</code> 2D arrays, <code>source</code> (gfs/era5/synthetic), ocean mask.</p>
+                    <p><strong>Response:</strong> JSON with <code>lats</code>, <code>lons</code>, <code>u</code>, <code>v</code> 2D arrays, <code>source</code> (gfs/synthetic), ocean mask.</p>
                 </div>
 
                 <div class="endpoint">
@@ -3320,7 +3316,7 @@ Response:
                     <div class="feature-card">
                         <h4><i class="fas fa-cloud-sun-rain"></i> Weather Data Acquisition</h4>
                         <ul style="list-style: none; padding: 0; margin: 0 0 1rem 0;">
-                            <li>GFS and ERA5 wind data acquisition, CMEMS wave and current forecasts, and the unified forecast-climatology blending framework.</li>
+                            <li>GFS wind data acquisition, CMEMS wave and current forecasts, and the unified forecast-climatology blending framework.</li>
                         </ul>
                         <a href="weather-data.html" class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Read article</a>
                     </div>

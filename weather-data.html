@@ -338,6 +338,13 @@ https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl?
             <section id="era5">
                 <h2>ERA5 Reanalysis</h2>
 
+                <div class="alert" style="background: rgba(245, 158, 11, 0.08); border-left: 4px solid #f59e0b; padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Not active in v0.1.5</strong> &mdash;
+                    ERA5 ingestion code exists in the codebase but is disabled in the current release.
+                    Wind data uses GFS as the primary source with synthetic fallback.
+                    This section documents the designed architecture for future activation.
+                </div>
+
                 <p>
                     <strong>ERA5</strong> is ECMWF's fifth-generation atmospheric reanalysis dataset, produced by
                     the Copernicus Climate Data Store (CDS). It combines historical observations with numerical
